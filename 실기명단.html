@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>명단 등록 (엑셀 표 스타일)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f7f7f7; }
+    .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+    td[contenteditable] { background: #fdfdfd; white-space: pre-wrap; }
+    input[type="month"], button { margin: 10px 0; padding: 10px; font-size: 16px; }
+    button { background: #007bff; color: white; border: none; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .success { background: #d4edda; }
+    .fail { background: #f8d7da; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📋 엑셀 표 스타일 명단 등록</h2>
+    <label>📅 등록할 월 선택</label>
+    <input type="month" id="testMonth">
+    
+    <br><label><input type="checkbox" id="pretestCheck"> 예비반 테스트로 등록</label>
+    
+    <button onclick="registerTableData()">⬆️ 전체 등록</button>
+
+    <table id="excelTable">
+      <thead>
+        <tr><th>#</th><th>이름</th><th>학교</th><th>학년</th><th>성별</th><th>결과</th></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const tableBody = document.getElementById('tableBody');
+    for (let i = 1; i <= 50; i++) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i}</td>
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td class="result"></td>
+      `;
+      tableBody.appendChild(tr);
+    }
+
+    // 붙여넣기 이벤트 처리 (엑셀 복사 자동 분배)
+    document.getElementById('excelTable').addEventListener('paste', function (e) {
+      const clipboardData = (e.clipboardData || window.clipboardData).getData('text');
+      const rows = clipboardData.split('\n').filter(r => r.trim() !== '');
+      const tableRows = document.querySelectorAll('#excelTable tbody tr');
+
+      e.preventDefault();
+
+      rows.forEach((rowData, rowIndex) => {
+        const cells = rowData.split('\t');
+        if (cells.length < 4 || rowIndex >= tableRows.length) return;
+
+        const tds = tableRows[rowIndex].querySelectorAll('td');
+        tds[1].innerText = cells[0]?.trim() || '';
+        tds[2].innerText = cells[1]?.trim() || '';
+        tds[3].innerText = cells[2]?.trim() || '';
+        tds[4].innerText = cells[3]?.trim() || '';
+      });
+    });
+
+    async function registerTableData() {
+  const isPretest = document.getElementById('pretestCheck').checked;
+  const testMonth = isPretest ? '예비반' : document.getElementById('testMonth').value;
+
+  if (!testMonth) return alert('📅 월을 선택하거나 예비반 테스트를 체크하세요!');
+
+  const rows = document.querySelectorAll('#excelTable tbody tr');
+
+  for (const row of rows) {
+    const cells = row.querySelectorAll('td');
+    const name = cells[1].innerText.trim();
+    const school = cells[2].innerText.trim();
+    const grade = cells[3].innerText.trim();
+    const gender = cells[4].innerText.trim();
+    const resultCell = cells[5];
+
+    if (!name || !school || !grade || !gender) continue;
+
+    try {
+      const res = await fetch('https://supermax.kr/college/test-students', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, school, grade, gender, test_month: testMonth })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        resultCell.textContent = `✅ ${data.exam_number}`;
+        resultCell.className = 'result success';
+      } else {
+        resultCell.textContent = '❌ 실패';
+        resultCell.className = 'result fail';
+      }
+    } catch (err) {
+      resultCell.textContent = '❌ 오류';
+      resultCell.className = 'result fail';
+    }
+  }
+}
+
+  </script>
+</body>
+</html>

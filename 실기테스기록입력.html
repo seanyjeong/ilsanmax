@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>실기 기록 입력 시스템</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --secondary: #3f37c9;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --gray: #6c757d;
+      --light-gray: #e9ecef;
+      --success: #4cc9f0;
+      --border-radius: 12px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f5f7ff;
+      color: var(--dark);
+      line-height: 1.6;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .card {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 25px;
+      margin-bottom: 25px;
+    }
+    
+    h2 {
+      color: var(--primary);
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    select, input[type="month"], input[type="text"] {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--light-gray);
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      transition: var(--transition);
+      background-color: white;
+    }
+    
+    select:focus, input[type="month"]:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .btn:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    .btn i {
+      font-size: 0.9rem;
+    }
+    
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 20px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 0.9rem;
+    }
+    
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--light-gray);
+    }
+    
+    th {
+      background-color: var(--primary);
+      color: white;
+      font-weight: 500;
+      position: sticky;
+      top: 0;
+    }
+    
+    tr:nth-child(even) {
+      background-color: var(--light);
+    }
+    
+    tr:hover {
+      background-color: rgba(67, 97, 238, 0.05);
+    }
+    
+    .record-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--light-gray);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    
+    .score-preview {
+      font-weight: 500;
+      color: var(--primary);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--gray);
+    }
+    
+    .empty-state i {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      color: var(--light-gray);
+    }
+    
+    .filter-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .filter-item {
+      flex: 1 1 200px;
+    }
+    
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    @media (max-width: 768px) {
+      .card {
+        padding: 15px;
+      }
+      
+      th, td {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+      }
+      
+      .btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+      }
+      
+      h2 {
+        font-size: 1.3rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .filter-item {
+        flex: 1 1 100%;
+      }
+      
+      .action-buttons {
+        justify-content: space-between;
+      }
+      
+      .btn {
+        flex: 1 1 45%;
+        margin-right: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h2><i class="fas fa-clipboard-list"></i> 실기 기록 입력</h2>
+      
+      <div class="filter-container">
+        <div class="filter-item">
+            <label><i class="far fa-calendar-alt"></i> 테스트 월</label>
+            <input type="month" id="testMonth" onchange="loadStudents()">
+            <label style="margin-top:5px; display:block;">
+              <input type="checkbox" id="pretestCheck" onchange="loadStudents()"> 예비반 테스트로 등록
+            </label>
+          </div>
+          
+        
+        <div class="filter-item">
+          <label><i class="fas fa-running"></i> 종목 선택</label>
+          <select id="eventSelect" onchange="loadStudents()">
+            <option value="">-- 선택하세요 --</option>
+            <option value="제자리멀리뛰기">제자리멀리뛰기</option>
+            <option value="20m왕복달리기">20M 왕복달리기</option>
+            <option value="좌전굴">좌전굴</option>
+            <option value="윗몸일으키기">윗몸일으키기</option>
+            <option value="배근력">배근력</option>
+            <option value="메디신볼던지기">메디신볼던지기</option>
+            <option value="10m왕복달리기">10M 왕복달리기</option>
+          </select>
+        </div>
+      </div>
+      
+      <div id="recordArea"></div>
+    </div>
+  </div>
+
+  <script>
+async function loadStudents() {
+  const isPretest = document.getElementById('pretestCheck').checked;
+  const event = document.getElementById('eventSelect').value;
+  const month = isPretest ? '예비반' : document.getElementById('testMonth').value;
+
+  if (!month || !event) return;
+
+      try {
+        const res = await fetch(`https://supermax.kr/college/test-records?test_month=${month}`);
+        const data = await res.json();
+
+        const container = document.getElementById('recordArea');
+        if (!data.success || data.records.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-user-slash"></i>
+              <p>해당 월의 테스트 기록이 없습니다.</p>
+            </div>
+          `;
+          return;
+        }
+
+        const valueColMap = {
+          '제자리멀리뛰기': 'jump_cm',
+          '20m왕복달리기': 'run20m_sec',
+          '좌전굴': 'sit_reach_cm',
+          '윗몸일으키기': 'situp_count',
+          '배근력': 'back_strength',
+          '메디신볼던지기': 'medball_m',
+          '10m왕복달리기': 'run10m_sec'
+        };
+        
+        const scoreColMap = {
+          '제자리멀리뛰기': 'jump_score',
+          '20m왕복달리기': 'run20m_score',
+          '좌전굴': 'sit_score',
+          '윗몸일으키기': 'situp_score',
+          '배근력': 'back_score',
+          '메디신볼던지기': 'medball_score',
+          '10m왕복달리기': 'run10m_score'
+        };
+
+        const valCol = valueColMap[event];
+        const scoreCol = scoreColMap[event];
+
+        let html = `
+          <div class="action-buttons">
+            <button class="btn" onclick="saveRecords('${event}')">
+              <i class="fas fa-save"></i> 저장하기
+            </button>
+          </div>
+          
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>이름</th>
+                  <th>학교</th>
+                  <th>학년</th>
+                  <th>성별</th>
+                  <th>${event} 기록</th>
+                  <th>점수</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+        
+        data.records.forEach((s, i) => {
+          const val = s[valCol] ?? '';
+          const score = s[scoreCol] ?? '';
+          html += `
+            <tr>
+              <td>${i + 1}</td>
+              <td>${s.name}</td>
+              <td>${s.school}</td>
+              <td>${s.grade}</td>
+              <td>${s.gender}</td>
+              <td>
+                <input type="text" 
+                       data-id="${s.exam_number}" 
+                       class="record-input" 
+                       value="${val}" 
+                       placeholder="기록 입력" 
+                       oninput="calculateScore(this, '${event}', '${s.gender}')">
+              </td>
+              <td><span class="score-preview">${score}</span></td>
+            </tr>
+          `;
+        });
+        
+        html += `
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="action-buttons">
+            <button class="btn" onclick="saveRecords('${event}')">
+              <i class="fas fa-save"></i> 저장하기
+            </button>
+          </div>
+        `;
+        
+        container.innerHTML = html;
+        
+      } catch (error) {
+        console.error('Error loading students:', error);
+        document.getElementById('recordArea').innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>데이터를 불러오는 중 오류가 발생했습니다.</p>
+          </div>
+        `;
+      }
+    }
+
+    async function saveRecords(eventName) {
+  const isPretest = document.getElementById('pretestCheck').checked;
+  const month = isPretest ? '예비반' : document.getElementById('testMonth').value;
+      const inputs = document.querySelectorAll('.record-input');
+      const records = [];
+
+      inputs.forEach(input => {
+        const user_id = input.dataset.id;
+        const record = input.value.trim();
+        if (record !== '') {
+          records.push({ user_id, event: eventName, record, test_month: month });
+        }
+      });
+
+      if (records.length === 0) {
+        showAlert('입력된 기록이 없습니다.', 'warning');
+        return;
+      }
+
+      try {
+        const res = await fetch('https://supermax.kr/college/save-test-records', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ records })
+        });
+        const result = await res.json();
+        showAlert(`성공적으로 저장되었습니다 (${result.updated}명)`, 'success');
+        loadStudents();
+      } catch (error) {
+        console.error('Error saving records:', error);
+        showAlert('저장 중 오류가 발생했습니다', 'error');
+      }
+    }
+
+    async function calculateScore(input, event, gender) {
+  const value = input.value.trim();
+  const td = input.parentElement.nextElementSibling;
+  
+  if (!value) {
+    td.querySelector('.score-preview').textContent = '';
+    return;
+  }
+
+
+}
+
+    function showAlert(message, type) {
+      const alert = document.createElement('div');
+      alert.style.position = 'fixed';
+      alert.style.bottom = '20px';
+      alert.style.left = '50%';
+      alert.style.transform = 'translateX(-50%)';
+      alert.style.padding = '12px 24px';
+      alert.style.borderRadius = 'var(--border-radius)';
+      alert.style.boxShadow = 'var(--box-shadow)';
+      alert.style.zIndex = '1000';
+      alert.style.transition = 'var(--transition)';
+      
+      if (type === 'success') {
+        alert.style.backgroundColor = '#4BB543';
+        alert.style.color = 'white';
+      } else if (type === 'error') {
+        alert.style.backgroundColor = '#FF3333';
+        alert.style.color = 'white';
+      } else {
+        alert.style.backgroundColor = '#FFCC00';
+        alert.style.color = 'black';
+      }
+      
+      alert.textContent = message;
+      document.body.appendChild(alert);
+      
+      setTimeout(() => {
+        alert.style.opacity = '0';
+        setTimeout(() => document.body.removeChild(alert), 300);
+      }, 3000);
+    }
+
+    document.getElementById('pretestCheck').addEventListener('change', (e) => {
+    document.getElementById('testMonth').disabled = e.target.checked;
+  });
+  </script>
+</body>
+</html>

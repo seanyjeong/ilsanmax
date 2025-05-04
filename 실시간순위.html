@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>맥스체대입시 실기 테스트 순위</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --secondary: #3498db;
+      --accent: #e74c3c;
+      --light: #ecf0f1;
+      --dark: #2c3e50;
+      --text: #333;
+      --border-radius: 10px;
+      --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      --transition: all 0.5s ease;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f5f7fa;
+      color: var(--text);
+      line-height: 1.6;
+      overflow: hidden;
+    }
+    
+    .container {
+      width: 100vw;
+      height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+    
+    .header h1 {
+      color: var(--primary);
+      font-size: 2.2rem;
+      margin-bottom: 5px;
+    }
+    
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .rank-board {
+      flex: 1;
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+    }
+    
+    .rank-title {
+      font-size: 1.8rem;
+      color: var(--secondary);
+      margin-bottom: 15px;
+      text-align: center;
+      font-weight: 700;
+    }
+    
+    .rank-container {
+      display: flex;
+      flex: 1;
+      gap: 20px;
+    }
+    
+    .rank-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .rank-column h3 {
+      background-color: var(--primary);
+      color: white;
+      padding: 10px;
+      border-radius: var(--border-radius);
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    
+    .rank-item {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      margin-bottom: 8px;
+      background-color: var(--light);
+      border-radius: var(--border-radius);
+    }
+    
+    .rank-number {
+      width: 30px;
+      height: 30px;
+      background-color: var(--secondary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+      font-weight: bold;
+    }
+    
+    .rank-info {
+      flex: 1;
+    }
+    
+    .rank-name {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    
+    .rank-detail {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    .rank-value {
+  font-size: 1.2rem;      /* 기존보다 살짝 큼 */
+  font-weight: 700;       /* 더 두껍게 */
+  color: var(--accent);   /* 기존 강조 색 유지 */
+}
+
+    
+    .footer {
+      text-align: center;
+      padding: 30px;
+    }
+    
+    .footer img {
+      max-height: 200px;
+    }
+    
+    /* 애니메이션 */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.8s ease forwards;
+    }
+    
+    /* 반응형 */
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 1.8rem;
+      }
+      
+      .rank-title {
+        font-size: 1.5rem;
+      }
+      
+      .rank-container {
+        flex-direction: column;
+      }
+    }
+    .tagline {
+  font-size: 1.2rem;
+  color: #333;
+  margin-top: 4px; /* 더 위로 붙이기 위해 줄임 */
+  text-align: center;
+  font-weight: 700;
+}
+.month-select-wrapper {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 4px 8px;
+  box-shadow: var(--box-shadow);
+  font-size: 0.9rem;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.month-select-wrapper select {
+  border: none;
+  font-size: 0.9rem;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+}
+
+
+
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+        <h1 id="mainTitle">맥스체대입시 일산교육원 예비반 공개테스트</h1>
+
+    </div>
+
+      
+    <p class="tagline">전국 체대입시 1위 맥스와 함께하면, 당신의 기록이 달라집니다.</p>
+
+    
+    <div class="content" id="content">
+      <!-- 동적으로 생성될 순위판 -->
+    </div>
+
+    
+    <div class="footer">
+        <img src="https://github.com/seanyjeong/supermax/blob/main/maxlogo.png?raw=true" alt="맥스체대입시 로고">
+      </div>
+      
+      <!-- 테스트 선택 드롭다운 (오른쪽 하단 고정) -->
+      <div class="month-select-wrapper">
+        <label for="monthSelect">📅</label>
+        <select id="monthSelect" onchange="fetchData()"></select>
+      </div>
+      
+  </div>
+
+  <script>
+    // 종목 리스트
+    const events = [
+      '전체 순위',
+      '제자리멀리뛰기',
+      '20m왕복달리기',
+      '좌전굴',
+      '윗몸일으키기',
+      '배근력',
+      '메디신볼던지기',
+      '10m왕복달리기'
+    ];
+    
+    let currentEventIndex = 0;
+    let allRecords = [];
+    
+    // 페이지 로드 시 데이터 불러오기
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchData();
+      setInterval(rotateEvent, 7000); // 7초마다 종목 변경
+      setInterval(fetchData, 30000); // 30초마다 데이터 갱신
+    });
+
+    function populateMonthSelect() {
+  const select = document.getElementById('monthSelect');
+  const now = new Date();
+
+  select.innerHTML = '';
+
+  // 최근 6개월 + 예비반
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const option = document.createElement('option');
+    option.value = `${year}-${month}`;
+    option.textContent = `${year}-${month}`;
+    select.appendChild(option);
+  }
+
+  // 예비반 추가
+  const preOption = document.createElement('option');
+  preOption.value = '예비반';
+  preOption.textContent = '예비반';
+  select.appendChild(preOption);
+}
+
+    
+    // 데이터 불러오기
+    async function fetchData() {
+  try {
+    const selectedMonth = getSelectedTestMonth();
+    const res = await fetch(`https://supermax.kr/college/test-records?test_month=${selectedMonth}`);
+    const data = await res.json();
+
+    if (data.success && data.records.length > 0) {
+      allRecords = data.records;
+
+      // ✅ 타이틀 동적 변경 여기!
+      const titleEl = document.getElementById('mainTitle');
+      if (selectedMonth === '예비반') {
+        titleEl.textContent = '맥스체대입시 일산교육원 예비반 공개테스트';
+      } else {
+        const [year, month] = selectedMonth.split('-');
+        titleEl.textContent = `맥스체대입시 일산교육원 ${year}년 ${parseInt(month)}월 공개테스트`;
+      }
+
+      updateRanking(events[currentEventIndex]);
+    }
+  } catch (error) {
+    console.error('데이터 불러오기 오류:', error);
+  }
+}
+
+    
+    // 현재 월 (YYYY-MM 형식)
+    function getSelectedTestMonth() {
+  const select = document.getElementById('monthSelect');
+  return select ? select.value : '';
+}
+
+    
+    // 종목 순환
+    function rotateEvent() {
+      currentEventIndex = (currentEventIndex + 1) % events.length;
+      updateRanking(events[currentEventIndex]);
+    }
+    
+    // 순위 업데이트
+    function updateRanking(event) {
+      const contentDiv = document.getElementById('content');
+      contentDiv.innerHTML = '';
+      contentDiv.classList.remove('fade-in');
+      void contentDiv.offsetWidth; // 리플로우 강제 실행
+      contentDiv.classList.add('fade-in');
+      
+      if (event === '전체 순위') {
+        showOverallRanking();
+      } else {
+        showEventRanking(event);
+      }
+    }
+    
+    // 전체 순위 표시
+    function showOverallRanking() {
+      const contentDiv = document.getElementById('content');
+      
+      // 전체 순위 (총점 기준)
+      const overallRanking = [...allRecords]
+        .filter(r => r.total_score)
+        .sort((a, b) => b.total_score - a.total_score)
+        .slice(0, 5);
+      
+      // 남자 순위
+      const maleRanking = [...allRecords]
+        .filter(r => r.gender === '남' || r.gender === '남자')
+        .filter(r => r.total_score)
+        .sort((a, b) => b.total_score - a.total_score)
+        .slice(0, 5);
+      
+      // 여자 순위
+      const femaleRanking = [...allRecords]
+        .filter(r => r.gender === '여' || r.gender === '여자')
+        .filter(r => r.total_score)
+        .sort((a, b) => b.total_score - a.total_score)
+        .slice(0, 5);
+      
+      const html = `
+        <div class="rank-board">
+          <h2 class="rank-title">🌟 전체 순위 TOP 5</h2>
+          <div class="rank-container">
+            <div class="rank-column">
+              <h3>종합 순위</h3>
+              ${overallRanking.map((r, i) => renderRankItem(r, i+1, 'total_score', '점')).join('')}
+            </div>
+            <div class="rank-column">
+              <h3>남자 순위</h3>
+              ${maleRanking.map((r, i) => renderRankItem(r, i+1, 'total_score', '점')).join('')}
+            </div>
+            <div class="rank-column">
+              <h3>여자 순위</h3>
+              ${femaleRanking.map((r, i) => renderRankItem(r, i+1, 'total_score', '점')).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+      
+      contentDiv.innerHTML = html;
+    }
+    
+    // 종목별 순위 표시
+    function showEventRanking(event) {
+      const contentDiv = document.getElementById('content');
+      
+      const columnMap = {
+        '제자리멀리뛰기': ['jump_cm', 'jump_score'],
+        '20m왕복달리기': ['run20m_sec', 'run20m_score'],
+        '좌전굴': ['sit_reach_cm', 'sit_score'],
+        '윗몸일으키기': ['situp_count', 'situp_score'],
+        '배근력': ['back_strength', 'back_score'],
+        '메디신볼던지기': ['medball_m', 'medball_score'],
+        '10m왕복달리기': ['run10m_sec', 'run10m_score']
+      };
+      
+      const [valueCol, scoreCol] = columnMap[event] || [];
+      if (!valueCol) return;
+      
+      // 전체 순위 (해당 종목 기준)
+      const overallRanking = [...allRecords]
+        .filter(r => r[valueCol] != null)
+        .sort((a, b) => {
+          // reverse 종목 확인 (값이 작을수록 좋은 기록)
+          const isReverse = event === '20m왕복달리기' || event === '10m왕복달리기';
+          return isReverse ? a[valueCol] - b[valueCol] : b[valueCol] - a[valueCol];
+        })
+        .slice(0, 5);
+      
+      // 남자 순위
+      const maleRanking = [...allRecords]
+        .filter(r => r.gender === '남' || r.gender === '남자')
+        .filter(r => r[valueCol] != null)
+        .sort((a, b) => {
+          const isReverse = event === '20m왕복달리기' || event === '10m왕복달리기';
+          return isReverse ? a[valueCol] - b[valueCol] : b[valueCol] - a[valueCol];
+        })
+        .slice(0, 5);
+      
+      // 여자 순위
+      const femaleRanking = [...allRecords]
+        .filter(r => r.gender === '여' || r.gender === '여자')
+        .filter(r => r[valueCol] != null)
+        .sort((a, b) => {
+          const isReverse = event === '20m왕복달리기' || event === '10m왕복달리기';
+          return isReverse ? a[valueCol] - b[valueCol] : b[valueCol] - a[valueCol];
+        })
+        .slice(0, 5);
+      
+      // 단위 설정
+      let unit = '';
+      if (event.includes('달리기')) unit = '초';
+      else if (event === '제자리멀리뛰기' || event === '좌전굴') unit = 'cm';
+      else if (event === '윗몸일으키기') unit = '회';
+      else if (event === '배근력') unit = 'kg';
+      else if (event === '메디신볼던지기') unit = 'm';
+      
+      const html = `
+  <div class="rank-board">
+    <h2 class="rank-title">🏆 ${event} TOP 5</h2>
+    <div class="rank-container">
+      <div class="rank-column">
+        <h3>남자 순위</h3>
+        ${maleRanking.map((r, i) => renderRankItem(r, i+1, valueCol, unit)).join('')}
+      </div>
+      <div class="rank-column">
+        <h3>여자 순위</h3>
+        ${femaleRanking.map((r, i) => renderRankItem(r, i+1, valueCol, unit)).join('')}
+      </div>
+    </div>
+  </div>
+`;
+
+      
+      contentDiv.innerHTML = html;
+    }
+    
+    // 순위 아이템 렌더링
+    function renderRankItem(record, rank, valueKey, unit) {
+      return `
+        <div class="rank-item">
+          <div class="rank-number">${rank}</div>
+          <div class="rank-info">
+            <div class="rank-name">${record.name}</div>
+            <div class="rank-detail">
+              <span>${record.school} ${record.grade}</span>
+              <span class="rank-value">${record[valueKey]}${unit}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+  populateMonthSelect();
+  fetchData();
+  setInterval(rotateEvent, 7000);
+  setInterval(fetchData, 30000);
+});
+
+  </script>
+</body>
+</html>
