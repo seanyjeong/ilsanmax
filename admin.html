@@ -5,26 +5,111 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>맥스체대입시 학원관리</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
-    body { text-align: center; padding-top: 40px; }
-    h1 { font-size: 1.8rem; margin-bottom: 30px; }
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --accent-color: #4cc9f0;
+    }
+    
+    body {
+      text-align: center;
+      padding-top: 40px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 40px;
+      color: var(--secondary-color);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+      display: inline-block;
+    }
+    
+    h1:after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: var(--accent-color);
+      border-radius: 2px;
+    }
+    
     .menu-container {
       display: grid;
-      gap: 15px;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      max-width: 500px;
+      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      max-width: 800px;
       margin: 0 auto;
-    }
-    .menu-item {
       padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      text-decoration: none;
-      color: #000;
-      font-weight: bold;
     }
+    
+    .menu-item {
+      padding: 25px 15px;
+      border: none;
+      border-radius: 16px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+    
+    .menu-item i {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      color: #fff;
+      transition: transform 0.3s ease;
+    }
+    
+    .menu-item span {
+      font-size: 1rem;
+    }
+    
     .menu-item:hover {
-      background-color: #f0f8ff;
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
+    }
+    
+    .menu-item:hover i {
+      transform: scale(1.1);
+    }
+    
+    /* 각 메뉴 아이템별 색상 차별화 */
+    .menu-item:nth-child(1) { background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%); }
+    .menu-item:nth-child(2) { background: linear-gradient(135deg, #7209b7 0%, #560bad 100%); }
+    .menu-item:nth-child(3) { background: linear-gradient(135deg, #f72585 0%, #b5179e 100%); }
+    .menu-item:nth-child(4) { background: linear-gradient(135deg, #4895ef 0%, #4cc9f0 100%); }
+    .menu-item:nth-child(5) { background: linear-gradient(135deg, #3f37c9 0%, #4361ee 100%); }
+    .menu-item:nth-child(6) { background: linear-gradient(135deg, #4cc9f0 0%, #4895ef 100%); }
+    
+    footer {
+      margin-top: 50px;
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    @media (max-width: 600px) {
+      .menu-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      h1 {
+        font-size: 1.6rem;
+      }
     }
   </style>
 </head>
@@ -33,12 +118,35 @@
   <h1>🏫 맥스체대입시 학원관리 시스템</h1>
 
   <div class="menu-container">
-    <a href="students.html" class="menu-item">🧑‍🎓 수강생 관리</a>
-    <a href="payments.html" class="menu-item">💰 결제 관리</a>
-    <a href="summary.html" class="menu-item">📊 결제 정산</a>
-    <a href="season.html" class="menu-item">📦 시즌비 관리</a>
-    <a href="instructors.html" class="menu-item">🧑‍🏫 강사 관리</a>
+    <a href="students.html" class="menu-item">
+      <i class="fas fa-user-graduate"></i>
+      <span>수강생 관리</span>
+    </a>
+    <a href="student-monthly.html" class="menu-item">
+      <i class="fas fa-calendar-alt"></i>
+      <span>수강요일 및 휴원</span>
+    </a>
+    <a href="payments.html" class="menu-item">
+      <i class="fas fa-won-sign"></i>
+      <span>결제 관리</span>
+    </a>
+    <a href="summary.html" class="menu-item">
+      <i class="fas fa-chart-pie"></i>
+      <span>결제 정산</span>
+    </a>
+    <a href="season.html" class="menu-item">
+      <i class="fas fa-box-open"></i>
+      <span>시즌비 관리</span>
+    </a>
+    <a href="instructors.html" class="menu-item">
+      <i class="fas fa-chalkboard-teacher"></i>
+      <span>강사 관리</span>
+    </a>
   </div>
+
+  <footer>
+    <p>© 2025 맥스체대입시 일산. All rights reserved.</p>
+  </footer>
 
 </body>
 </html>
