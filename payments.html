@@ -206,6 +206,27 @@
         flex-direction: column;
         align-items: flex-start;
       }
+
+      .summary-box {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  background: var(--white);
+  padding: 15px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+.summary-box div {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+}
+.summary-box span {
+  font-weight: 700;
+  color: var(--primary);
+}
+
       
       table {
         display: block;
@@ -219,6 +240,11 @@
     <div class="header">
       <h1><i class="fas fa-credit-card"></i> 결제 관리 시스템</h1>
     </div>
+    <div class="summary-box" id="summary-box">
+        <div><strong>총 예정금액:</strong> <span id="total-expected">-</span>원</div>
+        <div><strong>총 납부금액:</strong> <span id="total-paid">-</span>원</div>
+        <div><strong>총 미납금액:</strong> <span id="total-unpaid">-</span>원</div>
+      </div>
     
     <div class="filter-section">
       <div class="filter-group">
@@ -277,6 +303,12 @@
       const tbody = document.getElementById('payment-list');
       tbody.innerHTML = '';
       data.sort((a, b) => {
+  // 1️⃣ 납부 여부 (미납 먼저)
+  const paidA = a.paid_at ? 1 : 0;
+  const paidB = b.paid_at ? 1 : 0;
+  if (paidA !== paidB) return paidA - paidB;
+
+  // 2️⃣ 예정금액 기준 오름차순
   const countA = [...(a.weekdays || '')].length;
   const countB = [...(b.weekdays || '')].length;
 
@@ -294,6 +326,10 @@
 
   return expectedA - expectedB;
 });
+let totalExpected = 0;
+let totalPaid = 0;
+let totalUnpaid = 0;
+
 
       const monthDate = new Date(month + '-01');
       const lastDayOfMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
@@ -324,6 +360,14 @@
                               : weeklyCount === 2 ? 300000
                               : weeklyCount === 1 ? 150000 : 0;
 
+                              totalExpected += expectedAmount;
+if (row.paid_at) {
+  totalPaid += Number(row.amount || expectedAmount);
+} else {
+  totalUnpaid += Number(expectedAmount);
+}
+
+
         const tr = document.createElement('tr');
         if (row.paid_at) tr.classList.add('paid-row');
         
@@ -345,6 +389,10 @@
         `;
         tbody.appendChild(tr);
       });
+      document.getElementById('total-expected').textContent = totalExpected.toLocaleString();
+document.getElementById('total-paid').textContent = totalPaid.toLocaleString();
+document.getElementById('total-unpaid').textContent = totalUnpaid.toLocaleString();
+
     }
 
     async function savePayment(student_id, month, session_count, btn) {
