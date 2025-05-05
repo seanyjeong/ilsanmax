@@ -2,88 +2,424 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>월별 상태 설정</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>월별 학생 상태 설정 | Supermax College</title>
   <style>
-    table { width: 100%; font-size: 0.9rem; }
-    th, td { text-align: center; vertical-align: middle; }
-    select, input[type="text"] { width: 100%; box-sizing: border-box; }
-    button { padding: 4px 10px; }
+    :root {
+      --primary-color: #4361ee;
+      --primary-hover: #3a56d4;
+      --secondary-color: #f8f9fa;
+      --border-color: #e0e0e0;
+      --text-color: #333;
+      --light-text: #6c757d;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --border-radius: 8px;
+    }
+    
+    body {
+      font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      color: var(--text-color);
+      background-color: #f5f7fa;
+      line-height: 1.6;
+    }
+    
+    h2 {
+      color: var(--primary-color);
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
+    
+    .form-container {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+    
+    select, input[type="month"] {
+      width: 100%;
+      padding: 12px 15px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      transition: border-color 0.3s;
+      background-color: var(--secondary-color);
+    }
+    
+    select:focus, input[type="month"]:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+    }
+    
+    .student-info-box {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 25px;
+      margin-top: 20px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    select, input[type="month"] {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 16px;
+  transition: border-color 0.3s;
+  background-color: var(--secondary-color);
+  box-sizing: border-box; /* ✅ 추가 */
+}
+
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .info-row {
+      display: flex;
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .info-row:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    
+    .info-label {
+      font-weight: 600;
+      min-width: 100px;
+      color: var(--primary-color);
+    }
+    
+    .weekday-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .weekday-option {
+      display: flex;
+      align-items: center;
+    }
+    
+    .weekday-option input {
+      margin-right: 8px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary-color);
+    }
+    
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-top: 20px;
+    }
+    
+    button:hover {
+      background-color: var(--primary-hover);
+    }
+    
+    button:active {
+      transform: translateY(1px);
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .header img {
+      height: 50px;
+      margin-bottom: 15px;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: var(--light-text);
+      display: none;
+    }
+    
+    @media (max-width: 600px) {
+      body {
+        padding: 15px;
+      }
+      
+      .form-container, .student-info-box {
+        padding: 15px;
+      }
+      
+      .info-row {
+        flex-direction: column;
+      }
+      
+      .info-label {
+        margin-bottom: 5px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>📅 월별 학생 상태 설정</h1>
+  <div class="header">
+    <!-- 로고가 있다면 여기에 추가 -->
+    <h2>월별 학생 상태 설정</h2>
+    <p class="subtitle">학생의 월별 수업 정보를 관리합니다</p>
+  </div>
 
-  <label>조회할 월:
-    <input type="month" id="month" value="2025-05">
-  </label>
-  <button onclick="loadStudents()">조회</button>
+  <div class="form-container">
+    <label for="month">월 선택</label>
+    <input type="month" id="month" />
+    
+    <label for="student-select">학생 선택</label>
+    <select id="student-select">
+      <option value="">-- 학생을 선택하세요 --</option>
+    </select>
+  </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>이름</th><th>학년</th><th>학교</th><th>성별</th><th>상태</th><th>형태</th><th>요일</th><th>저장</th>
-      </tr>
-    </thead>
-    <tbody id="student-list"></tbody>
-  </table>
+  <div id="loading" class="loading">
+    <p>학생 정보를 불러오는 중입니다...</p>
+  </div>
+
+  <div id="student-box" class="student-info-box">
+    <div class="info-row">
+      <span class="info-label">이름</span>
+      <span id="name"></span>
+    </div>
+    
+    <div class="info-row">
+      <span class="info-label">학교</span>
+      <span id="school"></span>
+    </div>
+    
+    <div class="info-row">
+      <span class="info-label">학년</span>
+      <span id="grade"></span>
+    </div>
+    
+    <div class="info-row">
+      <span class="info-label">상태</span>
+      <select id="status" class="status-select">
+        <option value="재원">재원</option>
+        <option value="휴식">휴식</option>
+        <option value="퇴원">퇴원</option>
+      </select>
+    </div>
+    
+    <div class="info-row">
+      <span class="info-label">수업 형태</span>
+      <select id="lesson_type" class="lesson-select">
+        <option value="수시">수시</option>
+        <option value="정시">정시</option>
+      </select>
+    </div>
+    
+    <div class="info-row">
+      <span class="info-label">수업 요일</span>
+      <div class="weekday-group" id="weekday-checkboxes"></div>
+    </div>
+    
+    <button onclick="saveStatus()">
+      <span class="button-text">저장하기</span>
+    </button>
+  </div>
 
   <script>
     const API = 'https://supermax.kr/college';
+    let students = [];
+    const weekdaysList = ['월','화','수','목','금','토','일'];
 
-    async function loadStudents() {
+    document.addEventListener('DOMContentLoaded', async () => {
+      const now = new Date();
+      document.getElementById('month').value = now.toISOString().slice(0, 7);
+      
+      // 로딩 표시
+      document.getElementById('loading').style.display = 'block';
+      
+      try {
+        await loadAllStudents();
+      } catch (error) {
+        alert('학생 목록을 불러오는 중 오류가 발생했습니다.');
+        console.error(error);
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    });
+
+    async function loadAllStudents() {
+      const res = await fetch(`${API}/students`);
+      students = await res.json();
+      const select = document.getElementById('student-select');
+
+      // 기존 옵션 유지 (첫 번째 옵션은 유지)
+      while (select.options.length > 1) {
+        select.remove(1);
+      }
+
+      // 학생 데이터 알파벳/가나다 순으로 정렬
+      students.sort((a, b) => a.name.localeCompare(b.name, 'ko-KR'));
+
+      students.forEach(s => {
+        const option = document.createElement('option');
+        option.value = s.id;
+        option.textContent = `${s.name} (${s.grade}학년, ${s.school})`;
+        select.appendChild(option);
+      });
+
+      select.addEventListener('change', async function() {
+        if (!this.value) {
+          document.getElementById('student-box').style.display = 'none';
+          return;
+        }
+        
+        document.getElementById('loading').style.display = 'block';
+        try {
+          await loadStudentMonthlyData();
+        } catch (error) {
+          alert('학생 정보를 불러오는 중 오류가 발생했습니다.');
+          console.error(error);
+        } finally {
+          document.getElementById('loading').style.display = 'none';
+        }
+      });
+    }
+
+    async function loadStudentMonthlyData() {
+      const studentId = document.getElementById('student-select').value;
       const month = document.getElementById('month').value;
+      if (!studentId || !month) return;
+
       const res = await fetch(`${API}/get-student-monthly?month=${month}`);
-      const data = await res.json();
+      const monthly = await res.json();
+      const matched = monthly.find(s => s.student_id == studentId);
+      const base = students.find(s => s.id == studentId);
 
-      const tbody = document.getElementById('student-list');
-      tbody.innerHTML = '';
+      const data = matched || {
+        student_id: base.id,
+        name: base.name,
+        school: base.school,
+        grade: base.grade,
+        status: base.status,
+        lesson_type: base.lesson_type,
+        weekdays: base.weekdays
+      };
 
-      data.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${row.name}</td>
-          <td>${row.grade}</td>
-          <td>${row.school}</td>
-          <td>${row.gender}</td>
-          <td>
-            <select class="status">
-              <option value="재원" ${row.status === '재원' ? 'selected' : ''}>재원</option>
-              <option value="휴식" ${row.status === '휴식' ? 'selected' : ''}>휴식</option>
-              <option value="퇴원" ${row.status === '퇴원' ? 'selected' : ''}>퇴원</option>
-            </select>
-          </td>
-          <td>
-            <select class="lesson_type">
-              <option value="수시" ${row.lesson_type === '수시' ? 'selected' : ''}>수시</option>
-              <option value="정시" ${row.lesson_type === '정시' ? 'selected' : ''}>정시</option>
-            </select>
-          </td>
-          <td><input type="text" class="weekdays" value="${row.weekdays || ''}"></td>
-          <td><button onclick="saveRow(this, ${row.student_id})">저장</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
+      document.getElementById('name').textContent = data.name;
+      document.getElementById('school').textContent = data.school;
+      document.getElementById('grade').textContent = data.grade;
+      document.getElementById('status').value = data.status || '재원';
+      document.getElementById('lesson_type').value = data.lesson_type || '수시';
+
+      const container = document.getElementById('weekday-checkboxes');
+container.innerHTML = '';
+const selected = (data.weekdays || '').split('');
+
+weekdaysList.forEach(day => {
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.value = day;
+  checkbox.id = `day-${day}`;
+  if (selected.includes(day)) checkbox.checked = true;
+
+  const label = document.createElement('label');
+  label.htmlFor = checkbox.id;
+  label.textContent = day;
+
+  const wrapper = document.createElement('div');
+  wrapper.style.display = 'flex';
+  wrapper.style.flexDirection = 'column';
+  wrapper.style.alignItems = 'center';
+  wrapper.style.width = '40px';
+
+  wrapper.appendChild(checkbox);
+  wrapper.appendChild(label);
+  container.appendChild(wrapper);
+});
+
+
+      document.getElementById('student-box').style.display = 'block';
     }
 
-    async function saveRow(btn, student_id) {
-      const tr = btn.closest('tr');
+    async function saveStatus() {
+      const student_id = document.getElementById('student-select').value;
       const month = document.getElementById('month').value;
-      const status = tr.querySelector('.status').value;
-      const lesson_type = tr.querySelector('.lesson_type').value;
-      const weekdays = tr.querySelector('.weekdays').value;
+      const status = document.getElementById('status').value;
+      const lesson_type = document.getElementById('lesson_type').value;
+      const weekdays = Array.from(document.querySelectorAll('#weekday-checkboxes input:checked'))
+                            .map(cb => cb.value).join('');
 
-      const res = await fetch(`${API}/set-student-monthly`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ student_id, month, status, lesson_type, weekdays })
-      });
-      const result = await res.json();
-      alert(result.message);
+      const button = document.querySelector('button');
+      const originalText = button.querySelector('.button-text').textContent;
+      button.querySelector('.button-text').textContent = '저장 중...';
+      button.disabled = true;
+
+      try {
+        const res = await fetch(`${API}/set-student-monthly`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ student_id, month, status, lesson_type, weekdays })
+        });
+        
+        if (!res.ok) throw new Error('서버 응답 오류');
+        
+        // 성공 메시지 표시
+        const successMsg = document.createElement('div');
+        successMsg.textContent = '✅ 저장이 완료되었습니다!';
+        successMsg.style.color = 'green';
+        successMsg.style.marginTop = '15px';
+        successMsg.style.textAlign = 'center';
+        successMsg.style.fontWeight = 'bold';
+        
+        button.parentNode.insertBefore(successMsg, button.nextSibling);
+        
+        // 3초 후 메시지 사라지게
+        setTimeout(() => {
+          successMsg.style.opacity = '0';
+          setTimeout(() => successMsg.remove(), 300);
+        }, 3000);
+      } catch (error) {
+        alert('저장 중 오류가 발생했습니다. 다시 시도해 주세요.');
+        console.error(error);
+      } finally {
+        button.querySelector('.button-text').textContent = originalText;
+        button.disabled = false;
+      }
     }
 
-    loadStudents();
+    // 월 선택이 변경되면 학생 정보 다시 불러오기
+    document.getElementById('month').addEventListener('change', function() {
+      if (document.getElementById('student-select').value) {
+        loadStudentMonthlyData();
+      }
+    });
   </script>
 </body>
 </html>
