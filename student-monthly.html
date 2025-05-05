@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>월별 상태 설정</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css" />
+  <style>
+    table { width: 100%; font-size: 0.9rem; }
+    th, td { text-align: center; vertical-align: middle; }
+    select, input[type="text"] { width: 100%; box-sizing: border-box; }
+    button { padding: 4px 10px; }
+  </style>
+</head>
+<body>
+  <h1>📅 월별 학생 상태 설정</h1>
+
+  <label>조회할 월:
+    <input type="month" id="month" value="2025-05">
+  </label>
+  <button onclick="loadStudents()">조회</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>이름</th><th>학년</th><th>학교</th><th>성별</th><th>상태</th><th>형태</th><th>요일</th><th>저장</th>
+      </tr>
+    </thead>
+    <tbody id="student-list"></tbody>
+  </table>
+
+  <script>
+    const API = 'https://supermax.kr/college';
+
+    async function loadStudents() {
+      const month = document.getElementById('month').value;
+      const res = await fetch(`${API}/get-student-monthly?month=${month}`);
+      const data = await res.json();
+
+      const tbody = document.getElementById('student-list');
+      tbody.innerHTML = '';
+
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row.name}</td>
+          <td>${row.grade}</td>
+          <td>${row.school}</td>
+          <td>${row.gender}</td>
+          <td>
+            <select class="status">
+              <option value="재원" ${row.status === '재원' ? 'selected' : ''}>재원</option>
+              <option value="휴식" ${row.status === '휴식' ? 'selected' : ''}>휴식</option>
+              <option value="퇴원" ${row.status === '퇴원' ? 'selected' : ''}>퇴원</option>
+            </select>
+          </td>
+          <td>
+            <select class="lesson_type">
+              <option value="수시" ${row.lesson_type === '수시' ? 'selected' : ''}>수시</option>
+              <option value="정시" ${row.lesson_type === '정시' ? 'selected' : ''}>정시</option>
+            </select>
+          </td>
+          <td><input type="text" class="weekdays" value="${row.weekdays || ''}"></td>
+          <td><button onclick="saveRow(this, ${row.student_id})">저장</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function saveRow(btn, student_id) {
+      const tr = btn.closest('tr');
+      const month = document.getElementById('month').value;
+      const status = tr.querySelector('.status').value;
+      const lesson_type = tr.querySelector('.lesson_type').value;
+      const weekdays = tr.querySelector('.weekdays').value;
+
+      const res = await fetch(`${API}/set-student-monthly`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id, month, status, lesson_type, weekdays })
+      });
+      const result = await res.json();
+      alert(result.message);
+    }
+
+    loadStudents();
+  </script>
+</body>
+</html>

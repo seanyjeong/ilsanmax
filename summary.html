@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>결제 요약 대시보드</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css" />
+  <style>
+    .summary-box {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 1rem;
+      background: #fefefe;
+      box-shadow: 1px 1px 4px rgba(0,0,0,0.1);
+    }
+    h1 { margin-top: 1rem; }
+    table {
+      width: 100%;
+      font-size: 0.9rem;
+      margin-top: 2rem;
+    }
+    th, td {
+      text-align: center;
+      padding: 6px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <h1>📊 결제 요약 대시보드</h1>
+
+  <label>📅 월 선택:
+    <input type="month" id="month" value="2025-05">
+  </label>
+  <button onclick="loadSummary()">조회</button>
+
+  <div class="summary-box">
+    <div class="card"><h3>총 인원</h3><p id="total-count">-</p></div>
+    <div class="card"><h3>휴식 인원</h3><p id="rest-count">-</p></div>
+    <div class="card"><h3>납부 완료</h3><p id="paid-count">-</p></div>
+    <div class="card"><h3>미납</h3><p id="unpaid-count">-</p></div>
+    <div class="card"><h3>납부율</h3><p id="paid-rate">-</p></div>
+    <div class="card"><h3>카드 납부액</h3><p id="card-sum">-</p></div>
+    <div class="card"><h3>계좌 납부액</h3><p id="account-sum">-</p></div>
+    <div class="card"><h3>총 납부액</h3><p id="total-paid-sum">-</p></div>
+    <div class="card"><h3>예상 납부 총액</h3><p id="expected-sum">-</p></div>
+  </div>
+
+  <h3>❗ 미납자 리스트</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>이름</th><th>학교</th><th>학년</th><th>전화번호</th><th>예정금액</th>
+      </tr>
+    </thead>
+    <tbody id="unpaid-list"></tbody>
+  </table>
+
+  <script>
+    const API = 'https://supermax.kr/college';
+
+    async function loadSummary() {
+  const month = document.getElementById('month').value;
+  const today = new Date();
+  const targetDate = new Date(month + '-01');
+  const isFuture = targetDate > today;
+
+  let statusData = [], methodData = {};
+  try {
+    const [statusRes, methodRes] = await Promise.all([
+      fetch(`${API}/payment-status-summary?month=${month}`),
+      fetch(`${API}/payment-summary-by-method?month=${month}`)
+    ]);
+    statusData = await statusRes.json();
+    methodData = await methodRes.json();
+  } catch (e) {
+    alert('❌ 서버 오류: ' + (e.message || '알 수 없는 오류'));
+    return;
+  }
+
+  // ❗ '퇴원' 제외
+  const filtered = statusData.filter(row => row.status !== '퇴원');
+  const rest = filtered.filter(row => row.status === '휴식');
+  const active = filtered.filter(row => row.status === '재원' || row.status === '미납' || row.status === '납부완료');
+
+  const total = filtered.length;
+  const restCount = rest.length;
+
+  const paidList = active.filter(s => s.status === '납부완료');
+  const unpaidList = isFuture ? [] : active.filter(s => s.status === '미납');
+
+  const paid = paidList.length;
+  const unpaid = unpaidList.length;
+  const rate = active.length ? ((paid / active.length) * 100).toFixed(1) + '%' : '-';
+
+  const expectedSum = active.reduce((sum, s) => sum + (s.expected_amount || 0), 0);
+
+  const card = methodData?.['카드'] || 0;
+  const account = methodData?.['계좌'] || 0;
+
+  // ✅ 요약 텍스트 렌더링
+  document.getElementById('total-count').innerText = total;
+  document.getElementById('rest-count').innerText = restCount;
+  document.getElementById('paid-count').innerText = paid;
+  document.getElementById('unpaid-count').innerText = unpaid;
+  document.getElementById('paid-rate').innerText = rate;
+  document.getElementById('card-sum').innerText = card.toLocaleString() + '원';
+  document.getElementById('account-sum').innerText = account.toLocaleString() + '원';
+  document.getElementById('total-paid-sum').innerText = (card + account).toLocaleString() + '원';
+  document.getElementById('expected-sum').innerText = expectedSum.toLocaleString() + '원';
+
+  // ✅ 미납자 리스트 렌더링
+  const tbody = document.getElementById('unpaid-list');
+  tbody.innerHTML = '';
+  unpaidList.forEach(row => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${row.name}</td>
+      <td>${row.school || '-'}</td>
+      <td>${row.grade}</td>
+      <td>${row.phone || '-'}</td>
+      <td>${(row.expected_amount || 0).toLocaleString()}원</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+
+
+
+    loadSummary();
+  </script>
+</body>
+</html>

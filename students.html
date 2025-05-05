@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>수강생 관리</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css" />
+  <style>
+    table {
+      width: 100%;
+      font-size: 0.9rem;
+    }
+    th, td {
+      text-align: center;
+    }
+    .form-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧑‍🎓 수강생 관리</h1>
+
+  <form id="student-form">
+    <div class="form-group">
+      <input type="text" placeholder="이름" name="name" required>
+      <select name="grade">
+        <option value="1">1학년</option>
+        <option value="2">2학년</option>
+        <option value="3">3학년</option>
+        <option value="N">N수</option>
+      </select>
+      <select name="gender">
+        <option value="남">남</option>
+        <option value="여">여</option>
+      </select>
+      <input type="text" placeholder="학교" name="school">
+      <input type="text" placeholder="전화번호" name="phone">
+      <input type="text" placeholder="부모님 전화번호" name="parent_phone">
+      <input type="text" placeholder="티셔츠 사이즈" name="tshirt_size">
+      <input type="text" placeholder="등록경로" name="register_source">
+      <input type="date" name="first_registered_at">
+      <select name="lesson_type">
+        <option value="수시">수시</option>
+        <option value="정시">정시</option>
+      </select>
+      <select name="status">
+        <option value="재원">재원</option>
+        <option value="휴식">휴식</option>
+        <option value="퇴원">퇴원</option>
+      </select>
+      <input type="number" placeholder="결제일 (1~31)" name="payment_day">
+    </div>
+
+    <fieldset>
+      <legend>수업 요일 선택</legend>
+      <label><input type="checkbox" name="weekdays" value="월">월</label>
+      <label><input type="checkbox" name="weekdays" value="화">화</label>
+      <label><input type="checkbox" name="weekdays" value="수">수</label>
+      <label><input type="checkbox" name="weekdays" value="목">목</label>
+      <label><input type="checkbox" name="weekdays" value="금">금</label>
+      <label><input type="checkbox" name="weekdays" value="토">토</label>
+      <label><input type="checkbox" name="weekdays" value="일">일</label>
+    </fieldset>
+
+    <button type="submit">등록</button>
+  </form>
+
+  <h2>📋 수강생 리스트</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>이름</th><th>학년</th><th>성별</th><th>학교</th><th>전화번호</th><th>상태</th><th>수시/정시</th><th>결제일</th>
+      </tr>
+    </thead>
+    <tbody id="student-list"></tbody>
+  </table>
+
+  <script>
+    const API = 'https://supermax.kr/college';
+
+    async function fetchStudents() {
+      const res = await fetch(`${API}/student-summary`);
+      const data = await res.json();
+      const list = document.getElementById('student-list');
+      list.innerHTML = '';
+      data.students.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${s.name}</td>
+          <td>${s.grade}</td>
+          <td>${s.gender}</td>
+          <td>${s.school || ''}</td>
+          <td>${s.phone || ''}</td>
+          <td>${s.status || ''}</td>
+          <td>${s.lesson_type || ''}</td>
+          <td>${s.payment_day || ''}</td>
+        `;
+        list.appendChild(tr);
+      });
+    }
+
+    document.getElementById('student-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const weekdays = [...formData.getAll('weekdays')].join(''); // ✅ 요일 처리
+      formData.delete('weekdays');
+      const data = Object.fromEntries(formData.entries());
+      data.weekdays = weekdays;
+
+      const res = await fetch(`${API}/register-student`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      alert(result.message);
+      e.target.reset();
+      fetchStudents();
+    });
+
+    fetchStudents();
+  </script>
+</body>
+</html>

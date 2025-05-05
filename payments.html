@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>결제 관리</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css" />
+  <style>
+    h1 { margin: 20px 0; }
+    table { width: 100%; font-size: 0.9rem; }
+    th, td { text-align: center; vertical-align: middle; }
+    select, input[type="number"], input[type="date"] {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .paid { background: #e3ffe3; }
+  </style>
+</head>
+<body>
+  <h1>💰 결제 관리</h1>
+  <label>📅 조회할 월:
+    <input type="month" id="month-input" value="2025-05">
+  </label>
+  <button onclick="loadPayments()">조회</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>이름</th><th>학년</th><th>예정금액</th><th>납부일</th><th>결제수단</th><th>실납부금액</th><th>상태</th><th>저장</th>
+      </tr>
+    </thead>
+    <tbody id="payment-list"></tbody>
+  </table>
+
+  <script>
+    const API = 'https://supermax.kr/college';
+
+    function countSessionsInMonth(monthStr, weekdaysStr) {
+      if (!monthStr || !weekdaysStr) return 0;
+      const daysInMonth = new Date(monthStr.split('-')[0], monthStr.split('-')[1], 0).getDate();
+      const weekdayMap = { '일': 0, '월': 1, '화': 2, '수': 3, '목': 4, '금': 5, '토': 6 };
+      const targetDays = [...weekdaysStr].map(d => weekdayMap[d]);
+
+      let count = 0;
+      for (let i = 1; i <= daysInMonth; i++) {
+        const date = new Date(`${monthStr}-${String(i).padStart(2, '0')}`);
+        if (targetDays.includes(date.getDay())) count++;
+      }
+      return count;
+    }
+
+    async function loadPayments() {
+      const month = document.getElementById('month-input').value;
+      const res = await fetch(`${API}/payment-list?month=${month}`);
+      const data = await res.json();
+      const tbody = document.getElementById('payment-list');
+      tbody.innerHTML = '';
+
+      const monthDate = new Date(month + '-01');
+      const lastDayOfMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
+
+      if (!Array.isArray(data)) {
+        alert('❌ 서버 응답 오류');
+        return;
+      }
+
+      data.forEach(row => {
+        const registered = new Date(row.first_registered_at);
+        if (registered > lastDayOfMonth) return;
+        if (row.status === '휴식' || row.status === '퇴원') return;
+
+        const weekdays = row.weekdays || '';
+        const weeklyCount = [...weekdays].length;
+        const sessionCount = countSessionsInMonth(month, weekdays);
+
+        const expectedAmount = weeklyCount >= 5 ? 550000
+                              : weeklyCount === 4 ? 500000
+                              : weeklyCount === 3 ? 400000
+                              : weeklyCount === 2 ? 300000
+                              : weeklyCount === 1 ? 150000 : 0;
+
+        const tr = document.createElement('tr');
+        tr.className = row.paid_at ? 'paid' : '';
+        tr.innerHTML = `
+          <td>${row.name}</td>
+          <td>${row.grade}</td>
+          <td><input type="number" class="expected" value="${expectedAmount}" min="0"></td>
+          <td><input type="date" value="${row.paid_at ? row.paid_at.substring(0,10) : ''}" class="paid-at"></td>
+          <td>
+            <select class="method">
+              <option value="">선택</option>
+              <option value="카드">카드</option>
+              <option value="계좌">계좌</option>
+            </select>
+          </td>
+          <td><input type="number" class="amount" value="${row.amount || expectedAmount}"></td>
+          <td>${row.paid_at ? '납부완료' : '미납'}</td>
+          <td><button onclick="savePayment(${row.student_id}, '${month}', ${sessionCount}, this)">저장</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function savePayment(student_id, month, session_count, btn) {
+      const tr = btn.closest('tr');
+      const amount = tr.querySelector('.amount').value;
+      const paid_at = tr.querySelector('.paid-at').value;
+      const method = tr.querySelector('.method').value;
+
+      if (!paid_at) return alert('❗ 납부일자를 입력하세요');
+      if (!method) return alert('❗ 결제수단을 선택하세요');
+      if (!amount) return alert('❗ 금액을 입력하세요');
+
+      const res = await fetch(`${API}/save-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          student_id,
+          month,
+          session_count,
+          amount: Number(amount),
+          is_manual: 1,
+          paid_at,
+          payment_method: method
+        })
+      });
+
+      const resultText = await res.text();
+      try {
+        const result = JSON.parse(resultText);
+        alert(result.message);
+      } catch {
+        alert('서버 응답 오류: ' + resultText);
+      }
+
+      loadPayments();
+    }
+
+    loadPayments();
+  </script>
+</body>
+</html>
