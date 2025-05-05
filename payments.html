@@ -3,34 +3,255 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>결제 관리</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css" />
+  <title>결제 관리 시스템</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    h1 { margin: 20px 0; }
-    table { width: 100%; font-size: 0.9rem; }
-    th, td { text-align: center; vertical-align: middle; }
-    select, input[type="number"], input[type="date"] {
-      width: 100%;
-      box-sizing: border-box;
+    :root {
+      --primary: #4361ee;
+      --primary-light: #e6e9ff;
+      --success: #2ecc71;
+      --success-light: #e8f8f0;
+      --warning: #f39c12;
+      --danger: #e74c3c;
+      --gray: #95a5a6;
+      --light-gray: #ecf0f1;
+      --white: #ffffff;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
-    .paid { background: #e3ffe3; }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--light-gray);
+    }
+    
+    h1 {
+      color: var(--primary);
+      font-size: 28px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    h1 i {
+      color: var(--primary);
+    }
+    
+    .filter-section {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
+      background: var(--white);
+      padding: 15px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+    
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    label {
+      font-weight: 500;
+      color: #555;
+    }
+    
+    input[type="month"], 
+    input[type="number"], 
+    input[type="date"],
+    select {
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-family: inherit;
+      font-size: 14px;
+      transition: border 0.3s;
+    }
+    
+    input[type="month"]:focus, 
+    input[type="number"]:focus, 
+    input[type="date"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-light);
+    }
+    
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    button:hover {
+      background-color: #3a56d4;
+      transform: translateY(-1px);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    button.save-btn {
+      background-color: var(--success);
+      padding: 8px 12px;
+    }
+    
+    button.save-btn:hover {
+      background-color: #27ae60;
+    }
+    
+    .table-container {
+      background: var(--white);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      overflow: hidden;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    
+    th, td {
+      padding: 14px 12px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    
+    th {
+      background-color: var(--primary);
+      color: white;
+      font-weight: 500;
+      position: sticky;
+      top: 0;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+    
+    tr:hover {
+      background-color: #f1f3ff;
+    }
+    
+    .paid-row {
+      background-color: var(--success-light) !important;
+    }
+    
+    .status {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .status-paid {
+      background-color: var(--success-light);
+      color: var(--success);
+    }
+    
+    .status-unpaid {
+      background-color: #fff4e6;
+      color: var(--warning);
+    }
+    
+    .action-cell {
+      display: flex;
+      justify-content: center;
+    }
+    
+    @media (max-width: 768px) {
+      .filter-section {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>💰 결제 관리</h1>
-  <label>📅 조회할 월:
-    <input type="month" id="month-input" value="2025-05">
-  </label>
-  <button onclick="loadPayments()">조회</button>
-
-  <table>
-    <thead>
-      <tr>
-        <th>이름</th><th>학년</th><th>예정금액</th><th>납부일</th><th>결제수단</th><th>실납부금액</th><th>상태</th><th>저장</th>
-      </tr>
-    </thead>
-    <tbody id="payment-list"></tbody>
-  </table>
+  <div class="container">
+    <div class="header">
+      <h1><i class="fas fa-credit-card"></i> 결제 관리 시스템</h1>
+    </div>
+    
+    <div class="filter-section">
+      <div class="filter-group">
+        <label for="month-input"><i class="far fa-calendar-alt"></i> 조회 월:</label>
+        <input type="month" id="month-input" value="2025-05">
+      </div>
+      <button onclick="loadPayments()">
+        <i class="fas fa-search"></i> 조회
+      </button>
+    </div>
+    
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>이름</th>
+            <th>학년</th>
+            <th>예정금액</th>
+            <th>납부일</th>
+            <th>결제수단</th>
+            <th>실납부금액</th>
+            <th>상태</th>
+            <th>저장</th>
+          </tr>
+        </thead>
+        <tbody id="payment-list">
+          <tr>
+            <td colspan="8" style="text-align: center;">조회할 월을 선택하고 조회 버튼을 클릭하세요</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
   <script>
     const API = 'https://supermax.kr/college';
@@ -55,12 +276,36 @@
       const data = await res.json();
       const tbody = document.getElementById('payment-list');
       tbody.innerHTML = '';
+      data.sort((a, b) => {
+  const countA = [...(a.weekdays || '')].length;
+  const countB = [...(b.weekdays || '')].length;
+
+  const expectedA = countA >= 5 ? 550000
+                  : countA === 4 ? 500000
+                  : countA === 3 ? 400000
+                  : countA === 2 ? 300000
+                  : countA === 1 ? 150000 : 0;
+
+  const expectedB = countB >= 5 ? 550000
+                  : countB === 4 ? 500000
+                  : countB === 3 ? 400000
+                  : countB === 2 ? 300000
+                  : countB === 1 ? 150000 : 0;
+
+  return expectedA - expectedB;
+});
 
       const monthDate = new Date(month + '-01');
       const lastDayOfMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
 
       if (!Array.isArray(data)) {
         alert('❌ 서버 응답 오류');
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--danger);">데이터를 불러오는 중 오류가 발생했습니다</td></tr>';
+        return;
+      }
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">해당 월에 결제 정보가 없습니다</td></tr>';
         return;
       }
 
@@ -80,7 +325,8 @@
                               : weeklyCount === 1 ? 150000 : 0;
 
         const tr = document.createElement('tr');
-        tr.className = row.paid_at ? 'paid' : '';
+        if (row.paid_at) tr.classList.add('paid-row');
+        
         tr.innerHTML = `
           <td>${row.name}</td>
           <td>${row.grade}</td>
@@ -89,13 +335,13 @@
           <td>
             <select class="method">
               <option value="">선택</option>
-              <option value="카드">카드</option>
-              <option value="계좌">계좌</option>
+              <option value="카드" ${row.payment_method === '카드' ? 'selected' : ''}>카드</option>
+              <option value="계좌" ${row.payment_method === '계좌' ? 'selected' : ''}>계좌</option>
             </select>
           </td>
           <td><input type="number" class="amount" value="${row.amount || expectedAmount}"></td>
-          <td>${row.paid_at ? '납부완료' : '미납'}</td>
-          <td><button onclick="savePayment(${row.student_id}, '${month}', ${sessionCount}, this)">저장</button></td>
+          <td><span class="status ${row.paid_at ? 'status-paid' : 'status-unpaid'}">${row.paid_at ? '납부완료' : '미납'}</span></td>
+          <td class="action-cell"><button class="save-btn" onclick="savePayment(${row.student_id}, '${month}', ${sessionCount}, this)"><i class="fas fa-save"></i> 저장</button></td>
         `;
         tbody.appendChild(tr);
       });
@@ -107,36 +353,59 @@
       const paid_at = tr.querySelector('.paid-at').value;
       const method = tr.querySelector('.method').value;
 
-      if (!paid_at) return alert('❗ 납부일자를 입력하세요');
-      if (!method) return alert('❗ 결제수단을 선택하세요');
-      if (!amount) return alert('❗ 금액을 입력하세요');
-
-      const res = await fetch(`${API}/save-payment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          student_id,
-          month,
-          session_count,
-          amount: Number(amount),
-          is_manual: 1,
-          paid_at,
-          payment_method: method
-        })
-      });
-
-      const resultText = await res.text();
-      try {
-        const result = JSON.parse(resultText);
-        alert(result.message);
-      } catch {
-        alert('서버 응답 오류: ' + resultText);
+      if (!paid_at) {
+        alert('❗ 납부일자를 입력하세요');
+        tr.querySelector('.paid-at').focus();
+        return;
+      }
+      if (!method) {
+        alert('❗ 결제수단을 선택하세요');
+        tr.querySelector('.method').focus();
+        return;
+      }
+      if (!amount) {
+        alert('❗ 금액을 입력하세요');
+        tr.querySelector('.amount').focus();
+        return;
       }
 
-      loadPayments();
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 처리중';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API}/save-payment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            student_id,
+            month,
+            session_count,
+            amount: Number(amount),
+            is_manual: 1,
+            paid_at,
+            payment_method: method
+          })
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+          alert('✅ ' + result.message);
+          loadPayments();
+        } else {
+          alert('❌ ' + (result.message || '저장에 실패했습니다'));
+        }
+      } catch (error) {
+        alert('❌ 서버 연결에 문제가 발생했습니다: ' + error.message);
+      } finally {
+        btn.innerHTML = '<i class="fas fa-save"></i> 저장';
+        btn.disabled = false;
+      }
     }
 
-    loadPayments();
+    // 초기 로드
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPayments();
+    });
   </script>
 </body>
 </html>
