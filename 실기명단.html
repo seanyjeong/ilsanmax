@@ -1,35 +1,161 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>명단 등록 (엑셀 표 스타일)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>엑셀 스타일 명단 등록</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f7f7f7; }
-    .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
-    td[contenteditable] { background: #fdfdfd; white-space: pre-wrap; }
-    input[type="month"], button { margin: 10px 0; padding: 10px; font-size: 16px; }
-    button { background: #007bff; color: white; border: none; cursor: pointer; }
-    button:hover { background: #0056b3; }
-    .success { background: #d4edda; }
-    .fail { background: #f8d7da; }
+    :root {
+      --primary: #4361ee;
+      --secondary: #3f37c9;
+      --bg: #f5f7fb;
+      --white: #ffffff;
+      --gray: #6c757d;
+      --light-gray: #e0e0e0;
+      --success: #2ecc71;
+      --danger: #e74c3c;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      background: var(--white);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--primary);
+    }
+
+    h2 i {
+      font-size: 22px;
+    }
+
+    label {
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 8px;
+      color: var(--gray);
+    }
+
+    input[type="month"] {
+      padding: 10px 15px;
+      border: 1px solid var(--light-gray);
+      border-radius: 8px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    input[type="checkbox"] {
+      transform: scale(1.2);
+      margin-right: 8px;
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+      transition: background 0.3s;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: var(--secondary);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+    }
+
+    th, td {
+      border: 1px solid var(--light-gray);
+      padding: 12px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background: var(--primary);
+      color: white;
+    }
+
+    td[contenteditable] {
+      background: #fbfbfb;
+    }
+
+    .success {
+      background-color: #e8f8f0;
+      color: var(--success);
+      font-weight: bold;
+    }
+
+    .fail {
+      background-color: #fdecea;
+      color: var(--danger);
+      font-weight: bold;
+    }
+
+    .tip-box {
+      margin-top: 20px;
+      padding: 12px 16px;
+      background: #f0f4ff;
+      border-left: 5px solid var(--primary);
+      border-radius: 8px;
+      font-size: 14px;
+      color: #333;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>📋 엑셀 표 스타일 명단 등록</h2>
-    <label>📅 등록할 월 선택</label>
+    <h2><i class="fas fa-file-excel"></i> 엑셀 스타일 명단 등록</h2>
+
+    <label for="testMonth">📅 등록할 월 선택</label><br>
     <input type="month" id="testMonth">
-    
-    <br><label><input type="checkbox" id="pretestCheck"> 예비반 테스트로 등록</label>
-    
-    <button onclick="registerTableData()">⬆️ 전체 등록</button>
+    <br>
+    <label><input type="checkbox" id="pretestCheck"> 예비반 테스트로 등록</label>
+    <br>
+    <button onclick="registerTableData()"><i class="fas fa-upload"></i> 전체 등록</button>
+
+    <div class="tip-box">
+      📌 <strong>붙여넣기 팁:</strong> 엑셀에서 <strong>이름, 학교, 학년, 성별</strong> 순으로 복사 후 첫 칸에 붙여넣기 하면 자동으로 채워져요.
+    </div>
 
     <table id="excelTable">
       <thead>
-        <tr><th>#</th><th>이름</th><th>학교</th><th>학년</th><th>성별</th><th>결과</th></tr>
+        <tr>
+          <th>#</th>
+          <th>이름</th>
+          <th>학교</th>
+          <th>학년</th>
+          <th>성별</th>
+          <th>결과</th>
+        </tr>
       </thead>
       <tbody id="tableBody"></tbody>
     </table>
@@ -50,7 +176,6 @@
       tableBody.appendChild(tr);
     }
 
-    // 붙여넣기 이벤트 처리 (엑셀 복사 자동 분배)
     document.getElementById('excelTable').addEventListener('paste', function (e) {
       const clipboardData = (e.clipboardData || window.clipboardData).getData('text');
       const rows = clipboardData.split('\n').filter(r => r.trim() !== '');
@@ -71,45 +196,43 @@
     });
 
     async function registerTableData() {
-  const isPretest = document.getElementById('pretestCheck').checked;
-  const testMonth = isPretest ? '예비반' : document.getElementById('testMonth').value;
+      const isPretest = document.getElementById('pretestCheck').checked;
+      const testMonth = isPretest ? '예비반' : document.getElementById('testMonth').value;
+      if (!testMonth) return alert('📅 월을 선택하거나 예비반 테스트를 체크하세요!');
 
-  if (!testMonth) return alert('📅 월을 선택하거나 예비반 테스트를 체크하세요!');
+      const rows = document.querySelectorAll('#excelTable tbody tr');
 
-  const rows = document.querySelectorAll('#excelTable tbody tr');
+      for (const row of rows) {
+        const cells = row.querySelectorAll('td');
+        const name = cells[1].innerText.trim();
+        const school = cells[2].innerText.trim();
+        const grade = cells[3].innerText.trim();
+        const gender = cells[4].innerText.trim();
+        const resultCell = cells[5];
 
-  for (const row of rows) {
-    const cells = row.querySelectorAll('td');
-    const name = cells[1].innerText.trim();
-    const school = cells[2].innerText.trim();
-    const grade = cells[3].innerText.trim();
-    const gender = cells[4].innerText.trim();
-    const resultCell = cells[5];
+        if (!name || !school || !grade || !gender) continue;
 
-    if (!name || !school || !grade || !gender) continue;
+        try {
+          const res = await fetch('https://supermax.kr/college/test-students', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, school, grade, gender, test_month: testMonth })
+          });
 
-    try {
-      const res = await fetch('https://supermax.kr/college/test-students', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, school, grade, gender, test_month: testMonth })
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        resultCell.textContent = `✅ ${data.exam_number}`;
-        resultCell.className = 'result success';
-      } else {
-        resultCell.textContent = '❌ 실패';
-        resultCell.className = 'result fail';
+          const data = await res.json();
+          if (data.success) {
+            resultCell.textContent = `✅ ${data.exam_number}`;
+            resultCell.className = 'result success';
+          } else {
+            resultCell.textContent = '❌ 실패';
+            resultCell.className = 'result fail';
+          }
+        } catch (err) {
+          resultCell.textContent = '❌ 오류';
+          resultCell.className = 'result fail';
+        }
       }
-    } catch (err) {
-      resultCell.textContent = '❌ 오류';
-      resultCell.className = 'result fail';
     }
-  }
-}
-
   </script>
 </body>
 </html>
