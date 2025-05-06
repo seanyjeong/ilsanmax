@@ -353,6 +353,96 @@
         padding: 15px;
       }
     }
+
+    /* 토스 스타일의 알림 팝업 */
+.toss-notification {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 0;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease-out forwards;
+  width: 320px;
+  text-align: center;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.toss-notification-content {
+  padding: 30px;
+}
+
+.toss-checkmark {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 20px;
+}
+
+.toss-checkmark-circle {
+  stroke: #0064ff;
+  stroke-width: 2;
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+  fill: rgba(0, 100, 255, 0.1);
+}
+
+.toss-checkmark-check {
+  transform-origin: 50% 50%;
+  stroke: #0064ff;
+  stroke-width: 3;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+}
+
+.toss-message {
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+.toss-subtext {
+  font-size: 15px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* 애니메이션 */
+@keyframes stroke {
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -45%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* 닫기 버튼 (필요시 추가) */
+.toss-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #999;
+  cursor: pointer;
+}
   </style>
 </head>
 <body>
@@ -470,6 +560,17 @@
           <button onclick="submitPrepay()" style="background-color: var(--success);">저장</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div id="toss-popup" class="toss-notification">
+    <div class="toss-notification-content">
+      <svg class="toss-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+        <circle class="toss-checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+        <path class="toss-checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+      </svg>
+      <div class="toss-message">저장 완료!</div>
+      <div class="toss-subtext">변경 사항이 성공적으로 저장되었습니다</div>
     </div>
   </div>
 
@@ -678,11 +779,12 @@ body: JSON.stringify({
 
         const result = await res.json();
         if (res.ok) {
-          alert('✅ ' + result.message);
-          loadPayments();
-        } else {
-          alert('❌ ' + (result.message || '저장에 실패했습니다'));
-        }
+  showTossPopup(); // ✅ 이걸로 대체
+  loadPayments();  // 다시 불러오기
+} else {
+  alert('❌ ' + (result.message || '저장에 실패했습니다'));
+}
+
       } catch (error) {
         alert('❌ 서버 연결에 문제가 발생했습니다: ' + error.message);
       } finally {
@@ -712,6 +814,17 @@ body: JSON.stringify({
         console.error('❌ 학생 리스트 로딩 실패:', err);
       }
     }
+    function showTossPopup() {
+  const popup = document.getElementById('toss-popup');
+  popup.style.display = 'block';
+  
+  // 2초 후 자동으로 사라짐
+  setTimeout(() => {
+    popup.style.display = 'none';
+  }, 2000);
+}
+
+
 
     function openPrepayModalFromTop() {
       document.getElementById('prepay-modal').style.display = 'flex';
