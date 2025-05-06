@@ -1,88 +1,223 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>수강생 관리</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #e6f0ff;
+      --success: #4cc9f0;
+      --danger: #f72585;
+      --gray: #6c757d;
+      --dark: #2b2d42;
+      --light: #f8f9fa;
+      --white: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f5f7fb;
+      color: var(--dark);
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    h1, h2 {
+      margin-bottom: 20px;
+      color: var(--primary);
+    }
+
+    .card {
+      background: var(--white);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      margin-bottom: 40px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    input, select {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    fieldset {
+      border: none;
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    label {
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px 20px;
+      background: var(--primary);
+      color: white;
+      font-weight: 500;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
     table {
       width: 100%;
-      font-size: 0.9rem;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: var(--white);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
-    th, td {
+
+    th {
+      background-color: var(--primary);
+      color: white;
+      padding: 12px;
+    }
+
+    td {
+      padding: 12px;
       text-align: center;
+      border-bottom: 1px solid #f0f0f0;
     }
-    .form-group {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 10px;
-      margin-bottom: 1rem;
+
+    tr:hover {
+      background-color: var(--primary-light);
     }
-    h1 {
-      margin-top: 20px;
-      margin-bottom: 10px;
-      font-size: 1.5rem;
+
+    .status-badge {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      background: #e0ecff;
+      color: var(--primary);
     }
+    .weekday-toggle-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.weekday-toggle {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.weekday-toggle input[type="checkbox"] {
+  display: none;
+}
+
+.weekday-toggle span {
+  display: inline-block;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: white;
+  font-weight: 500;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.weekday-toggle input[type="checkbox"]:checked + span {
+  background-color: #4361ee;
+  color: white;
+  border-color: #4361ee;
+}
+
   </style>
 </head>
 <body>
-  <h1>🧑‍🎓 수강생 관리</h1>
+  <div class="container">
+    <h1><i class="fas fa-user-plus" style="color:#4361ee;"></i> 수강생 등록</h1>
+    <div class="card">
+      <form id="student-form">
+        <div class="form-grid">
+          <input type="text" name="name" placeholder="이름" required>
+          <select name="grade">
+            <option value="1">1학년</option>
+            <option value="2">2학년</option>
+            <option value="3">3학년</option>
+            <option value="N">N수</option>
+          </select>
+          <select name="gender">
+            <option value="남">남</option>
+            <option value="여">여</option>
+          </select>
+          <input type="text" name="school" placeholder="학교">
+          <input type="text" name="phone" placeholder="전화번호">
+          <input type="text" name="parent_phone" placeholder="부모님 번호">
+          <input type="text" name="tshirt_size" placeholder="티셔츠 사이즈">
+          <input type="text" name="register_source" placeholder="등록경로">
+          <input type="date" name="first_registered_at">
+          <select name="lesson_type">
+            <option value="수시">수시</option>
+            <option value="정시">정시</option>
+          </select>
+          <select name="status">
+            <option value="재원">재원</option>
+            <option value="휴식">휴식</option>
+            <option value="퇴원">퇴원</option>
+          </select>
+          <input type="number" name="payment_day" placeholder="결제일 (1~31)">
+        </div>
 
-  <form id="student-form">
-    <div class="form-group">
-      <input type="text" placeholder="이름" name="name" required>
-      <select name="grade">
-        <option value="1">1학년</option>
-        <option value="2">2학년</option>
-        <option value="3">3학년</option>
-        <option value="N">N수</option>
-      </select>
-      <select name="gender">
-        <option value="남">남</option>
-        <option value="여">여</option>
-      </select>
-      <input type="text" placeholder="학교" name="school">
-      <input type="text" placeholder="전화번호" name="phone">
-      <input type="text" placeholder="부모님 전화번호" name="parent_phone">
-      <input type="text" placeholder="티셔츠 사이즈" name="tshirt_size">
-      <input type="text" placeholder="등록경로" name="register_source">
-      <input type="date" name="first_registered_at">
-      <select name="lesson_type">
-        <option value="수시">수시</option>
-        <option value="정시">정시</option>
-      </select>
-      <select name="status">
-        <option value="재원">재원</option>
-        <option value="휴식">휴식</option>
-        <option value="퇴원">퇴원</option>
-      </select>
-      <input type="number" placeholder="결제일 (1~31)" name="payment_day">
+        <div class="weekday-toggle-group">
+          <label class="weekday-toggle"><input type="checkbox" name="weekdays" value="월"><span>월</span></label>
+          <label class="weekday-toggle"><input type="checkbox" name="weekdays" value="화"><span>화</span></label>
+          <label class="weekday-toggle"><input type="checkbox" name="weekdays" value="수"><span>수</span></label>
+          <label class="weekday-toggle"><input type="checkbox" name="weekdays" value="목"><span>목</span></label>
+          <label class="weekday-toggle"><input type="checkbox" name="weekdays" value="금"><span>금</span></label>
+          <label class="weekday-toggle"><input type="checkbox" name="weekdays" value="토"><span>토</span></label>
+          <label class="weekday-toggle"><input type="checkbox" name="weekdays" value="일"><span>일</span></label>
+        </div>
+        
+
+        <button type="submit">등록</button>
+      </form>
     </div>
 
-    <fieldset>
-      <legend>수업 요일 선택</legend>
-      <label><input type="checkbox" name="weekdays" value="월">월</label>
-      <label><input type="checkbox" name="weekdays" value="화">화</label>
-      <label><input type="checkbox" name="weekdays" value="수">수</label>
-      <label><input type="checkbox" name="weekdays" value="목">목</label>
-      <label><input type="checkbox" name="weekdays" value="금">금</label>
-      <label><input type="checkbox" name="weekdays" value="토">토</label>
-      <label><input type="checkbox" name="weekdays" value="일">일</label>
-    </fieldset>
-
-    <button type="submit">등록</button>
-  </form>
-
-  <h2>📋 수강생 리스트</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>이름</th><th>학년</th><th>성별</th><th>학교</th><th>전화번호</th><th>상태</th><th>수시/정시</th><th>결제일</th>
-      </tr>
-    </thead>
-    <tbody id="student-list"></tbody>
-  </table>
+    <h2><i class="fas fa-list-ul" style="color:#4361ee;"></i> 수강생 리스트</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>이름</th><th>학년</th><th>성별</th><th>학교</th><th>전화번호</th><th>상태</th><th>수시/정시</th><th>결제일</th>
+          </tr>
+        </thead>
+        <tbody id="student-list">
+          <tr><td colspan="8">로딩 중...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
   <script>
     const API = 'https://supermax.kr/college';
@@ -100,7 +235,7 @@
           <td>${s.gender}</td>
           <td>${s.school || ''}</td>
           <td>${s.phone || ''}</td>
-          <td>${s.status || ''}</td>
+          <td><span class="status-badge">${s.status}</span></td>
           <td>${s.lesson_type || ''}</td>
           <td>${s.payment_day || ''}</td>
         `;
@@ -111,7 +246,7 @@
     document.getElementById('student-form').addEventListener('submit', async e => {
       e.preventDefault();
       const formData = new FormData(e.target);
-      const weekdays = [...formData.getAll('weekdays')].join(''); // ✅ 요일 처리
+      const weekdays = [...formData.getAll('weekdays')].join('');
       formData.delete('weekdays');
       const data = Object.fromEntries(formData.entries());
       data.weekdays = weekdays;
