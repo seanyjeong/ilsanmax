@@ -480,6 +480,9 @@
         <button onclick="openPrepayModalFromTop()" style="background:#888;">
           <i class="fas fa-plus"></i> 임의납부 등록
         </button>
+        <button onclick="showUnpaidList()" style="background-color: var(--danger);">
+          <i class="fas fa-file-alt"></i> 미납자명단
+        </button>
       </div>
       
       <div class="table-container">
@@ -574,6 +577,30 @@
     </div>
   </div>
 
+  <!-- 미납자 명단 모달 -->
+<div id="unpaid-modal" class="modal-overlay">
+  <div class="modal-content" style="max-width: 600px;">
+    <div class="modal-header">
+      <h3><i class="fas fa-exclamation-triangle"></i> 미납자 명단</h3>
+      <button class="modal-close" onclick="closeUnpaidModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom: 15px;">
+        <button onclick="copyUnpaidList()" style="background-color: var(--primary);">
+          <i class="fas fa-copy"></i> 명단 복사
+        </button>
+        <span id="copy-message" style="margin-left: 10px; color: var(--success); display: none;">
+          복사되었습니다!
+        </span>
+      </div>
+      <div id="unpaid-list-content" style="background: #f9f9f9; padding: 15px; border-radius: 5px; font-family: monospace; white-space: pre;"></div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeUnpaidModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
   <script>
     const API = 'https://supermax.kr/college';
     const PASSWORD = 'max6765'; // 접근 비밀번호
@@ -621,6 +648,51 @@
       }
       return count;
     }
+    function showUnpaidList() {
+  const month = document.getElementById('month-input').value;
+  const rows = document.querySelectorAll('#payment-list tr');
+  
+  let unpaidList = [];
+  let totalUnpaid = 0;
+  
+  rows.forEach(row => {
+    if (!row.classList.contains('paid-row') && row.cells.length > 1) {
+      const name = row.cells[0].textContent;
+      const expected = row.querySelector('.expected').value;
+      unpaidList.push({ name, expected });
+      totalUnpaid += parseInt(expected) || 0;
+    }
+  });
+  
+  if (unpaidList.length === 0) {
+    alert('해당 월에 미납자가 없습니다.');
+    return;
+  }
+  
+  // 명단 포맷팅
+  let listText = `[${month} 미납자 명단]\n\n`;
+  unpaidList.forEach(item => {
+    listText += `${item.name.padEnd(10, ' ')} ${parseInt(item.expected).toLocaleString().padStart(10, ' ')}원\n`;
+  });
+  
+  listText += ` (${unpaidList.length}명)`;
+  
+  document.getElementById('unpaid-list-content').textContent = listText;
+  document.getElementById('unpaid-modal').style.display = 'flex';
+}
+
+function closeUnpaidModal() {
+  document.getElementById('unpaid-modal').style.display = 'none';
+}
+
+function copyUnpaidList() {
+  const text = document.getElementById('unpaid-list-content').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const msg = document.getElementById('copy-message');
+    msg.style.display = 'inline';
+    setTimeout(() => msg.style.display = 'none', 2000);
+  });
+}
 
     async function loadPayments() {
       const month = document.getElementById('month-input').value;
