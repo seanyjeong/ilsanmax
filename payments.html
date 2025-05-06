@@ -664,15 +664,16 @@
         const res = await fetch(`${API}/save-payment`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            student_id,
-            month,
-            session_count,
-            amount: Number(amount),
-            is_manual: 1,
-            paid_at,
-            payment_method: method
-          })
+body: JSON.stringify({
+  student_id,
+  month,
+  applied_month: month, // ✅ 추가
+  session_count,
+  amount: Number(amount),
+  is_manual: 1,
+  paid_at,
+  payment_method: method
+})
         });
 
         const result = await res.json();
