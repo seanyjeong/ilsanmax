@@ -1,142 +1,217 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>실기 테스트 관리 시스템</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 800px;
-            width: 100%;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            text-align: center;
-        }
-        
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px 20px;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-        
-        p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-        
-        .buttons {
-            display: flex;
-            flex-direction: column;
-            padding: 30px;
-            gap: 20px;
-        }
-        
-        .btn {
-            text-decoration: none;
-            color: white;
-            padding: 15px 0;
-            border-radius: 8px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        .btn i {
-            margin-right: 10px;
-            font-size: 1.5rem;
-        }
-        
-        .btn-record {
-            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
-        }
-        
-        .btn-record:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(255, 154, 158, 0.3);
-        }
-        
-        .btn-list {
-            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
-        }
-        
-        .btn-list:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(161, 196, 253, 0.3);
-        }
-        
-        .btn-rank {
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-            color: #333;
-        }
-        
-        .btn-rank:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(252, 182, 159, 0.3);
-        }
-        
-        footer {
-            padding: 20px;
-            background: #f8f9fa;
-            color: #666;
-            font-size: 0.9rem;
-        }
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>맥스체대입시 학원관리</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --accent-color: #4cc9f0;
+      --success-color: #2ecc71;
+    }
+    
+    body {
+      text-align: center;
+      padding-top: 40px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 40px;
+      color: var(--secondary-color);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+      display: inline-block;
+      padding: 0 20px;
+    }
+    
+    h1:after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background: var(--accent-color);
+      border-radius: 2px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .menu-container {
+      display: grid;
+      gap: 25px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .menu-item {
+      padding: 30px 15px;
+      border: none;
+      border-radius: 16px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      box-shadow: 0 6px 15px rgba(67, 97, 238, 0.3);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .menu-item::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+      );
+      transition: 0.5s;
+    }
+    
+    .menu-item:hover::before {
+      left: 100%;
+    }
+    
+    .menu-item i {
+      font-size: 2.2rem;
+      margin-bottom: 15px;
+      color: #fff;
+      transition: all 0.3s ease;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .menu-item span {
+      font-size: 1.1rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .menu-item:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 25px rgba(67, 97, 238, 0.4);
+    }
+    
+    .menu-item:hover i {
+      transform: scale(1.15) rotate(5deg);
+    }
+    
+    /* 각 메뉴 아이템별 색상 차별화 */
+    .menu-item:nth-child(1) { background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%); }
+    .menu-item:nth-child(2) { background: linear-gradient(135deg, #7209b7 0%, #560bad 100%); }
+    .menu-item:nth-child(3) { background: linear-gradient(135deg, #f72585 0%, #b5179e 100%); }
+    .menu-item:nth-child(4) { background: linear-gradient(135deg, #4895ef 0%, #4cc9f0 100%); }
+    .menu-item:nth-child(5) { background: linear-gradient(135deg, #3f37c9 0%, #4361ee 100%); }
+    .menu-item:nth-child(6) { background: linear-gradient(135deg, #4cc9f0 0%, #4895ef 100%); }
+    .menu-item:nth-child(7) { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); }
+    .menu-item:nth-child(8) { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
+    
+    footer {
+      margin-top: 60px;
+      color: #666;
+      font-size: 0.9rem;
+      padding: 20px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 10px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .logo {
+      font-weight: bold;
+      color: var(--secondary-color);
+      font-size: 1.1em;
+    }
+    
+    @media (max-width: 700px) {
+      .menu-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .menu-item {
+        padding: 20px 10px;
+      }
+      
+      .menu-item i {
+        font-size: 1.8rem;
+      }
+    }
+    
+    @media (max-width: 400px) {
+      .menu-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>실기 테스트 관리 시스템</h1>
-            <p>기록 입력과 실시간 순위 확인을 한 곳에서</p>
-        </header>
-        
-        <div class="buttons">
-            <a href="실기테스트기록입력.html" class="btn btn-record">
-                <i class="fas fa-edit"></i>
-                실기 테스트 기록 입력
-            </a>
-            
-            <a href="실기명단.html" class="btn btn-list">
-                <i class="fas fa-list-ol"></i>
-                실기 명단 확인
-            </a>
-            
-            <a href="실시간순위.html" class="btn btn-rank">
-                <i class="fas fa-trophy"></i>
-                실시간 순위 보기
-            </a>
-        </div>
-        
-        <footer>
-            <p>© 2025 실기 테스트 관리 시스템. All rights reserved.</p>
-        </footer>
-    </div>
+
+  <h1> 맥스체대입시 일산 관리 시스템</h1>
+  <div class="menu-container">
+    <a href="students.html" class="menu-item">
+      <i class="fas fa-user-graduate"></i>
+      <span>수강생 관리</span>
+    </a>
+    <a href="student-monthly.html" class="menu-item">
+      <i class="fas fa-calendar-alt"></i>
+      <span>수강요일 및 휴원</span>
+    </a>
+    <a href="payments.html" class="menu-item">
+      <i class="fas fa-won-sign"></i>
+      <span>결제 관리</span>
+    </a>
+    <a href="summary.html" class="menu-item">
+      <i class="fas fa-chart-pie"></i>
+      <span>결제 정산</span>
+    </a>
+    <a href="season.html" class="menu-item">
+      <i class="fas fa-box-open"></i>
+      <span>시즌비 관리</span>
+    </a>
+    <a href="instructors.html" class="menu-item">
+      <i class="fas fa-chalkboard-teacher"></i>
+      <span>강사 관리</span>
+    </a>
+    <a href="test.html" class="menu-item">
+      <i class="fas fa-running"></i>
+      <span>실기테스트</span>
+    </a>
+    <a href="admin.html" class="menu-item">
+      <i class="fas fa-user-shield"></i>
+      <span>관리자 설정</span>
+    </a>
+  </div>
+
+  <footer>
+    <p><span class="logo">맥스체대입시 일산교육원</span> © 2025. All rights reserved.</p>
+
+  </footer>
+
 </body>
 </html>
