@@ -604,6 +604,25 @@
             
           </div>
         </div>
+        <!-- 수시/정시 분포 -->
+<div class="stat-item">
+  <div class="stat-title">수시 / 정시</div>
+  <div class="stat-value" id="lessonTypeTotal">- 명</div>
+  <div class="progress-container">
+    <div class="progress-bar">
+      <div class="progress-fill progress-male" id="susiBar" style="width: 0%"></div>
+    </div>
+    <div class="progress-label">
+      <span id="susiPercent">수시 0%</span>
+      <span id="jungsiPercent">정시 0%</span>
+    </div>
+    <div class="progress-label">
+      <span id="susiCount">수시 0명</span>
+      <span id="jungsiCount">정시 0명</span>
+    </div>
+  </div>
+</div>
+
       </div>
     </div>
 
@@ -676,6 +695,7 @@
 
     // 통계 업데이트
     function updateStatsDisplay(list) {
+      console.log('🟡 lesson_type 값들:', list.map(s => s.lesson_type));  // ← 여기
       // 학년별 통계
       const gradeCounts = countBy(list, 'grade');
       const totalStudents = list.length;
@@ -695,6 +715,24 @@
           progressBar.style.width = `${percent}%`;
         }
       });
+      // 수시 / 정시 통계
+const lessonTypeCounts = countBy(list, 'lesson_type');
+const susiCount = lessonTypeCounts['수시'] || 0;
+const jungsiCount = lessonTypeCounts['정시'] || 0;
+const totalType = susiCount + jungsiCount;
+
+document.getElementById('lessonTypeTotal').textContent = `${totalType} 명`;
+
+const susiPercent = totalType > 0 ? Math.round(susiCount / totalType * 100) : 0;
+const jungsiPercent = totalType > 0 ? Math.round(jungsiCount / totalType * 100) : 0;
+
+document.getElementById('susiPercent').textContent = `수시 ${susiPercent}%`;
+document.getElementById('jungsiPercent').textContent = `정시 ${jungsiPercent}%`;
+document.getElementById('susiCount').textContent = `수시 ${susiCount}명`;
+document.getElementById('jungsiCount').textContent = `정시 ${jungsiCount}명`;
+
+document.getElementById('susiBar').style.width = `${susiPercent}%`;
+
       
       // 성별 통계
       const genderCounts = countBy(list, 'gender');
