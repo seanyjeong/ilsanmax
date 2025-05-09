@@ -483,6 +483,10 @@
         <button onclick="showUnpaidList()" style="background-color: var(--danger);">
           <i class="fas fa-file-alt"></i> 미납자명단
         </button>
+        <button onclick="openPartialFeeModal()" style="background-color: var(--success);">
+          <i class="fas fa-calculator"></i> 중간등록 계산기
+        </button>
+
       </div>
       
       <div class="table-container">
@@ -601,6 +605,47 @@
   </div>
 </div>
 
+<div id="partial-fee-modal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3><i class="fas fa-calculator"></i> 중간 등록 학원비 계산기</h3>
+      <button class="modal-close" onclick="closePartialFeeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-form-group">
+        <label>조회 월</label>
+        <input type="month" id="partial-month" value="2025-05">
+      </div>
+      <div class="modal-form-group">
+        <label>입학일</label>
+        <input type="date" id="partial-start">
+      </div>
+      <div class="modal-form-group">
+        <label>수업 요일</label>
+        <input type="text" id="partial-weekdays" placeholder="예: 월수금">
+      </div>
+      <div class="modal-form-group">
+        <label>정상 월 수업료</label>
+        <select id="partial-fullprice">
+          <option value="150000">주 1회 - 150,000</option>
+          <option value="300000">주 2회 - 300,000</option>
+          <option value="400000">주 3회 - 400,000</option>
+          <option value="500000">주 4회 - 500,000</option>
+          <option value="550000">주 5회 이상 - 550,000</option>
+        </select>
+      </div>
+      <div class="modal-form-group">
+        <label>계산된 금액</label>
+        <input type="text" id="partial-result" disabled style="font-weight: bold; color: var(--primary);">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closePartialFeeModal()">닫기</button>
+      <button onclick="calculatePartialFee()" style="background-color: var(--success);">계산</button>
+    </div>
+  </div>
+</div>
+
   <script>
     const API = 'https://supermax.kr/college';
     const PASSWORD = 'max6765'; // 접근 비밀번호
@@ -648,6 +693,45 @@
       }
       return count;
     }
+
+
+    function openPartialFeeModal() {
+  document.getElementById('partial-fee-modal').style.display = 'flex';
+  document.getElementById('partial-start').valueAsDate = new Date();
+}
+function closePartialFeeModal() {
+  document.getElementById('partial-fee-modal').style.display = 'none';
+  document.getElementById('partial-result').value = '';
+}
+//중간등록 학원비계산
+function calculatePartialFee() {
+  const month = document.getElementById('partial-month').value;
+  const startDateStr = document.getElementById('partial-start').value;
+  const weekdaysStr = document.getElementById('partial-weekdays').value.trim();
+  const fullPrice = parseInt(document.getElementById('partial-fullprice').value);
+  if (!month || !startDateStr || !weekdaysStr) return alert('모든 항목을 입력해주세요');
+
+  const weekdayMap = { '일': 0, '월': 1, '화': 2, '수': 3, '목': 4, '금': 5, '토': 6 };
+  const selectedDays = [...weekdaysStr].map(d => weekdayMap[d]);
+
+  const year = parseInt(month.split('-')[0]);
+  const mon = parseInt(month.split('-')[1]);
+  const lastDay = new Date(year, mon, 0).getDate();
+  const startDate = new Date(startDateStr);
+
+  let remaining = 0;
+  for (let i = 1; i <= lastDay; i++) {
+    const d = new Date(`${month}-${String(i).padStart(2, '0')}`);
+    if (d >= startDate && selectedDays.includes(d.getDay())) remaining++;
+  }
+
+  const weeklyCount = selectedDays.length;
+  const fullSessions = weeklyCount >= 5 ? 20 : weeklyCount === 4 ? 16 : weeklyCount === 3 ? 12 : weeklyCount === 2 ? 8 : 4;
+  const raw = (remaining / fullSessions) * fullPrice;
+  const result = Math.floor(raw / 1000) * 1000; // 천원 단위 절삭
+
+  document.getElementById('partial-result').value = `${remaining}회 / ${fullSessions}회 기준 → ${result.toLocaleString()}원`;
+}
     function showUnpaidList() {
   const month = document.getElementById('month-input').value;
   const rows = document.querySelectorAll('#payment-list tr');
