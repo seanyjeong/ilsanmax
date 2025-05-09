@@ -461,10 +461,13 @@
   <div id="main-content" style="display: none;">
     <div class="container">
       <div class="header">
-        <h1><i class="fas fa-credit-card"></i> 결제 관리 시스템</h1>
+        <h1><i class="fas fa-credit-card"></i> 결제 관리</h1>
       </div>
       <div class="summary-box" id="summary-box">
         <div><strong>총 예정금액:</strong> <span id="total-expected">-</span>원</div>
+        <div><strong>카드 매출:</strong> <span id="card-total">-</span>원</div> <!-- ✅ 추가 -->
+        <div><strong>계좌 매출:</strong> <span id="account-total">-</span>원</div> <!-- ✅ 추가 -->
+        
         <div><strong>총 납부금액:</strong> <span id="total-paid">-</span>원</div>
         <div><strong>총 미납금액:</strong> <span id="total-unpaid">-</span>원</div>
       </div>
@@ -811,6 +814,9 @@ function copyUnpaidList() {
       let totalExpected = 0;
       let totalPaid = 0;
       let totalUnpaid = 0;
+      let cardTotal = 0;
+      let accountTotal = 0;
+
 
       const monthDate = new Date(month + '-01');
       const lastDayOfMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
@@ -851,19 +857,30 @@ function copyUnpaidList() {
         );
 
         if (isPrepayMonth) {
-          totalExpected += expectedAmount;
-          totalPaid += expectedAmount;
-        } else if (!isPrepaid) {
-          totalExpected += expectedAmount;
-          if (row.paid_at) {
-            totalPaid += Number(row.amount || expectedAmount);
-          } else {
-            totalUnpaid += expectedAmount;
-          }
-        }
+  totalExpected += expectedAmount;
+  totalPaid += expectedAmount;
 
-        const tr = document.createElement('tr');
-        if (row.paid_at) tr.classList.add('paid-row');
+  if (row.payment_method === '카드') cardTotal += expectedAmount;
+  else if (row.payment_method === '계좌') accountTotal += expectedAmount;
+
+} else if (!isPrepaid) {
+  totalExpected += expectedAmount;
+
+  if (row.paid_at) {
+    const paidAmount = Number(row.amount || expectedAmount);
+    totalPaid += paidAmount;
+
+    if (row.payment_method === '카드') cardTotal += paidAmount;
+    else if (row.payment_method === '계좌') accountTotal += paidAmount;
+
+  } else {
+    totalUnpaid += expectedAmount;
+  }
+}
+const tr = document.createElement('tr');
+if (row.paid_at) tr.classList.add('paid-row');  // ✅ 납부완료 색상 적용
+
+
 
         tr.innerHTML = `
           <td>${row.name}</td>
@@ -889,6 +906,9 @@ function copyUnpaidList() {
       document.getElementById('total-expected').textContent = totalExpected.toLocaleString();
       document.getElementById('total-paid').textContent = totalPaid.toLocaleString();
       document.getElementById('total-unpaid').textContent = totalUnpaid.toLocaleString();
+      document.getElementById('card-total').textContent = cardTotal.toLocaleString();
+document.getElementById('account-total').textContent = accountTotal.toLocaleString();
+
     }
 
     // 납부 금액 저장
