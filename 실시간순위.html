@@ -214,6 +214,8 @@
 
 
   </style>
+
+
 </head>
 <body>
   <div class="container">
@@ -244,6 +246,35 @@
   </div>
 
   <script>
+
+    let isFetching = false;
+    async function fetchData() {
+  try {
+    isFetching = true; // ⛳️ 데이터 로딩 시작
+
+    const selectedMonth = getSelectedTestMonth();
+    const res = await fetch(`https://supermax.kr/college/test-records?test_month=${selectedMonth}`);
+    const data = await res.json();
+
+    if (data.success && data.records.length > 0) {
+      allRecords = data.records;
+
+      const titleEl = document.getElementById('mainTitle');
+      if (selectedMonth === '예비반') {
+        titleEl.textContent = '맥스체대입시 일산교육원 예비반 공개테스트';
+      } else {
+        const [year, month] = selectedMonth.split('-');
+        titleEl.textContent = `맥스체대입시 일산교육원 ${year}년 ${parseInt(month)}월 공개테스트`;
+      }
+    }
+  } catch (error) {
+    console.error('데이터 불러오기 오류:', error);
+  } finally {
+    isFetching = false; // ✅ 로딩 끝
+  }
+}
+
+
     // 종목 리스트
     const events = [
       '전체 순위',
@@ -292,30 +323,7 @@
 
     
     // 데이터 불러오기
-    async function fetchData() {
-  try {
-    const selectedMonth = getSelectedTestMonth();
-    const res = await fetch(`https://supermax.kr/college/test-records?test_month=${selectedMonth}`);
-    const data = await res.json();
-
-    if (data.success && data.records.length > 0) {
-      allRecords = data.records;
-
-      // ✅ 타이틀 동적 변경 여기!
-      const titleEl = document.getElementById('mainTitle');
-      if (selectedMonth === '예비반') {
-        titleEl.textContent = '맥스체대입시 일산교육원 예비반 공개테스트';
-      } else {
-        const [year, month] = selectedMonth.split('-');
-        titleEl.textContent = `맥스체대입시 일산교육원 ${year}년 ${parseInt(month)}월 공개테스트`;
-      }
-
-      updateRanking(events[currentEventIndex]);
-    }
-  } catch (error) {
-    console.error('데이터 불러오기 오류:', error);
-  }
-}
+ 
 
     
     // 현재 월 (YYYY-MM 형식)
@@ -326,26 +334,34 @@
 
     
     // 종목 순환
-    function rotateEvent() {
-      currentEventIndex = (currentEventIndex + 1) % events.length;
-      updateRanking(events[currentEventIndex]);
-    }
+function rotateEventLoop() {
+  if (!isFetching) {
+    currentEventIndex = (currentEventIndex + 1) % events.length;
+    updateRanking(events[currentEventIndex]);
+  } else {
+    console.log('⏳ 데이터 갱신 중, 순위 스킵');
+  }
+
+  setTimeout(rotateEventLoop, 7000);
+}
+
+
     
     // 순위 업데이트
-    function updateRanking(event) {
-      const contentDiv = document.getElementById('content');
-      contentDiv.innerHTML = '';
-      contentDiv.classList.remove('fade-in');
-      void contentDiv.offsetWidth; // 리플로우 강제 실행
-      contentDiv.classList.add('fade-in');
-      
-      if (event === '전체 순위') {
-        showOverallRanking();
-      } else {
-        showEventRanking(event);
-      }
-    }
-    
+function updateRanking(event) {
+  const contentDiv = document.getElementById('content');
+  
+  // 강제 초기화
+  const clone = contentDiv.cloneNode(false);
+  contentDiv.parentNode.replaceChild(clone, contentDiv);
+
+  if (event === '전체 순위') {
+    showOverallRanking();
+  } else {
+    showEventRanking(event);
+  }
+}
+
     // 전체 순위 표시
     function showOverallRanking() {
       const contentDiv = document.getElementById('content');
@@ -483,12 +499,18 @@
         </div>
       `;
     }
-    document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
   populateMonthSelect();
-  fetchData();
-  setInterval(rotateEvent, 7000);
-  setInterval(fetchData, 30000);
+
+  fetchData().then(() => {
+    updateRanking(events[currentEventIndex]); // 초기 1회
+    rotateEventLoop();                        // 이후 계속 순환
+  });
+
+  setInterval(fetchData, 60000); // 데이터 갱신만 60초마다
 });
+
+
 
   </script>
 </body>
