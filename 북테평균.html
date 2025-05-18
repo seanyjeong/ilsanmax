@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>지점별 종목별 남녀 평균 기록</title>
+  <link href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css" rel="stylesheet" />
+  <style>
+    body { font-family: 'Pretendard', sans-serif; font-size: 14px; }
+    table { width: 100%; font-size: 0.97em; background: #fff; border-radius: 10px; }
+    th, td { text-align: center; padding: 9px 4px; }
+    th { background: #3667b2; color: #fff; cursor: pointer; user-select: none; }
+    .subth { background: #88aadd; color: #fff; }
+    tr:hover { background: #f5f8ff; }
+    .branch-col { font-weight: bold; background: #f6f8fc; }
+    .active-sort { background: #ffe087 !important; color: #222 !important; }
+  </style>
+</head>
+<body>
+  <h2>지점별 종목별 남/여 평균 기록</h2>
+  <div id="avgTable">로딩중...</div>
+  <script>
+    // 지점 리스트
+    const branches = [
+      '강남','군포','동탄','부천','분당','서구','서초','수원','영통','용인','원주',
+      '의정부','이천','인천계양','인천연수','일산','포천.철원','하남'
+    ];
+    const events = [
+      { key: 'jump_record', label: '제멀', fixed: 1 },
+      { key: 'medicineball_record', label: '메디신', fixed: 2 },
+      { key: 'shuttle_record', label: '10m왕복', fixed: 2 },
+      { key: 'sit_reach_record', label: '좌전굴', fixed: 1 },
+      { key: 'back_strength_record', label: '배근력', fixed: 1 },
+    ];
+    // 전역 상태: sort정보
+    let sort = { evIdx: null, gender: null, desc: true };
+    let avgRows = [];
+
+    function getAvg(arr, fixed=2) {
+      const nums = arr
+        .map(v => typeof v === 'string' ? v.trim() : v)
+        .filter(v =>
+          v !== null &&
+          v !== undefined &&
+          v !== '' &&
+          String(v).toUpperCase() !== 'F' &&
+          !isNaN(Number(v))
+        ).map(Number);
+      if (nums.length === 0) return '-';
+      return (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(fixed);
+    }
+
+    // 평균 데이터 미리 구조화
+    function getAvgRows(data) {
+      return branches.map(branch => {
+        const row = { branch, avgs: [] };
+        for (const ev of events) {
+          // 남
+          const males = data.filter(d =>
+            d.branch === branch && d.gender === '남' && d[ev.key] !== undefined
+          ).map(d => d[ev.key]);
+          // 여
+          const females = data.filter(d =>
+            d.branch === branch && d.gender === '여' && d[ev.key] !== undefined
+          ).map(d => d[ev.key]);
+          row.avgs.push({
+            male: getAvg(males, ev.fixed),
+            female: getAvg(females, ev.fixed)
+          });
+        }
+        return row;
+      });
+    }
+
+    // 렌더링 함수(정렬정보 사용)
+    function renderAvgTable() {
+      let sortedRows = [...avgRows];
+      if (sort.evIdx !== null && sort.gender) {
+        sortedRows = sortedRows.sort((a, b) => {
+          const x = a.avgs[sort.evIdx][sort.gender];
+          const y = b.avgs[sort.evIdx][sort.gender];
+          if (x === '-' && y === '-') return 0;
+          if (x === '-') return 1;
+          if (y === '-') return -1;
+          // string → number
+          const xn = Number(x), yn = Number(y);
+          return sort.desc ? yn - xn : xn - yn;
+        });
+      }
+
+      // 표 헤더
+      let html = `<table>
+        <thead>
+          <tr>
+            <th rowspan="2">지점</th>
+            ${events.map(e => `<th colspan="2">${e.label}</th>`).join('')}
+          </tr>
+          <tr class="subth">
+            ${events.map((ev, i) => `
+              <th class="${sort.evIdx===i&&sort.gender==='male'?'active-sort':''}" onclick="sortAvg(${i},'male')">
+                남 ${sort.evIdx===i&&sort.gender==='male' ? (sort.desc?'▼':'▲') : ''}
+              </th>
+              <th class="${sort.evIdx===i&&sort.gender==='female'?'active-sort':''}" onclick="sortAvg(${i},'female')">
+                여 ${sort.evIdx===i&&sort.gender==='female' ? (sort.desc?'▼':'▲') : ''}
+              </th>
+            `).join('')}
+          </tr>
+        </thead>
+        <tbody>
+      `;
+      for (const row of sortedRows) {
+        html += `<tr>
+          <td class="branch-col">${row.branch}</td>
+          ${row.avgs.map(avg => `<td>${avg.male}</td><td>${avg.female}</td>`).join('')}
+        </tr>`;
+      }
+      html += '</tbody></table>';
+      document.getElementById('avgTable').innerHTML = html;
+    }
+
+    // 정렬 트리거 함수
+    window.sortAvg = function(evIdx, gender) {
+      if (sort.evIdx === evIdx && sort.gender === gender) {
+        sort.desc = !sort.desc; // 같은 항목이면 토글
+      } else {
+        sort.evIdx = evIdx;
+        sort.gender = gender;
+        sort.desc = true; // 새 항목은 항상 내림차순 시작
+      }
+      renderAvgTable();
+    };
+
+    // 데이터 fetch 및 최초 렌더
+    async function fetchDataAndRender() {
+      const res = await fetch('https://supermax.kr/feed/all-records');
+      const data = await res.json();
+      avgRows = getAvgRows(data);
+      renderAvgTable();
+    }
+    fetchDataAndRender();
+  </script>
+</body>
+</html>
