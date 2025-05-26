@@ -489,6 +489,10 @@
         <button onclick="openPartialFeeModal()" style="background-color: var(--success);">
           <i class="fas fa-calculator"></i> 중간등록 계산기
         </button>
+        <button onclick="document.getElementById('carryover-modal').style.display='flex'">
+            <i class="fas fa-retweet"></i> 이월 계산기
+          </button>
+          
 
       </div>
       
@@ -649,6 +653,39 @@
   </div>
 </div>
 
+<!-- 이월계산 모달 예시 -->
+<div id="carryover-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-retweet"></i> 이월 계산기</h3>
+        <button class="modal-close" onclick="closeCarryOverModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-form-group">
+          <label>총 결제금액</label>
+          <input type="number" id="carryover-total" value="400000">
+        </div>
+        <div class="modal-form-group">
+          <label>총 수업횟수(기준)</label>
+          <input type="number" id="carryover-total-sessions" value="12">
+        </div>
+        <div class="modal-form-group">
+          <label>실제 출석 횟수</label>
+          <input type="number" id="carryover-attended" value="7">
+        </div>
+        <div class="modal-form-group">
+          <label>이월될 금액</label>
+          <input type="text" id="carryover-result" disabled>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeCarryOverModal()">닫기</button>
+        <button onclick="calculateCarryOver()" style="background: var(--success);">계산</button>
+      </div>
+    </div>
+  </div>
+  
+
   <script>
     const API = 'https://supermax.kr/college';
     const PASSWORD = 'max6765'; // 접근 비밀번호
@@ -696,6 +733,44 @@
       }
       return count;
     }
+
+    function calcCarryOver(totalFee, totalSessions, attendedSessions) {
+  const missed = totalSessions - attendedSessions;
+  const perSession = totalFee / totalSessions;
+  const carryAmount = Math.floor(perSession * missed / 1000) * 1000; // 천원단위 절삭
+  return {
+    carrySessions: missed,
+    carryAmount: carryAmount
+  };
+}
+
+
+
+// 예시
+const totalFee = 400000;    // 월 수강료
+const totalSessions = 12;   // 월 전체 횟수
+const attendedSessions = 1; // 실제 출석
+
+const result = calcCarryOver(totalFee, totalSessions, attendedSessions);
+console.log(result);
+// { carrySessions: 5, carryAmount: 160000 }
+
+function calculateCarryOver() {
+  const total = Number(document.getElementById('carryover-total').value);
+  const totalSessions = Number(document.getElementById('carryover-total-sessions').value);
+  const attended = Number(document.getElementById('carryover-attended').value);
+  const { carrySessions, carryAmount } = calcCarryOver(total, totalSessions, attended);
+
+  document.getElementById('carryover-result').value = 
+    `${carrySessions}회 (${carryAmount.toLocaleString()}원) 이월`;
+}
+
+function closeCarryOverModal() {
+  document.getElementById('carryover-modal').style.display = 'none';
+  document.getElementById('carryover-result').value = '';
+}
+
+
 
 
     function openPartialFeeModal() {
