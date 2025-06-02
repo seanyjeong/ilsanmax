@@ -727,12 +727,15 @@
 
     // 페이지 로드 시 비밀번호 모달 표시
     document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('month-input').value = new Date().toISOString().slice(0,7);
+      
       document.getElementById('password-modal').style.display = 'flex';
       document.getElementById('password-input').focus();
     });
 
     // 비밀번호 확인 함수
     function checkPassword() {
+      
       const input = document.getElementById('password-input').value;
       const errorMsg = document.getElementById('password-error');
       
@@ -996,12 +999,29 @@ function copyUnpaidList() {
         return;
       }
 
-      data.forEach(row => {
+data.forEach(row => {
+  const month = document.getElementById('month-input').value;
   const registered = new Date(row.first_registered_at);
-  if (registered > lastDayOfMonth) return;
+  const selectedMonth = new Date(month + '-01');
+  const now = new Date();
+  const isCurrentMonth = (selectedMonth.getMonth() === now.getMonth() && selectedMonth.getFullYear() === now.getFullYear());
+
+  // 1. 등록일 체크 (이미 네가 하는대로)
+  if (registered > selectedMonth) return;
+
+  // 2. 휴식/퇴원 체크
   if (row.status === '휴식' || row.status === '퇴원') return;
-  const today = new Date().getDate();
-  if (row.payment_day && Number(row.payment_day) > today) return;
+
+  // 3. 결제대상 달이 현재 선택한 달이 아니면 스킵
+  // row.month가 없는 경우 row.applied_month 등 실제 데이터 확인 필요!
+  // 아래 둘 중 데이터에 맞게 써!
+  if (row.month && row.month !== month) return;
+  // 또는
+  // if (row.applied_month && row.applied_month !== month) return;
+
+  // 4. "이번 달" + 납부일이 아직 안된 경우 스킵
+  if (isCurrentMonth && row.payment_day && Number(row.payment_day) > now.getDate()) return;
+
 
   const weekdays = row.weekdays || '';
   const weeklyCount = [...weekdays].length;
