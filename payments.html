@@ -486,6 +486,8 @@
         <button onclick="showUnpaidList()" style="background-color: var(--danger);">
           <i class="fas fa-file-alt"></i> 미납자명단
         </button>
+
+
         <button onclick="openPartialFeeModal()" style="background-color: var(--success);">
           <i class="fas fa-calculator"></i> 중간등록 계산기
         </button>
@@ -496,11 +498,23 @@
           <button onclick="openExpectedAmountModalUI()" style="background: var(--warning);">
             <i class="fas fa-pen"></i> 예정금액 수정
           </button>
-             
+
+          
           
 
       </div>
-      
+<div class="search-row" style="display:flex; justify-content:space-between; align-items:center; margin:20px 0 10px 0; gap:12px;">
+  <!-- 왼쪽: 검색창 -->
+  <div style="display:flex; align-items:center; gap:10px;">
+    <label for="search-input" style="font-weight:500;"><i class="fas fa-search"></i> 이름 검색:</label>
+    <input type="text" id="search-input" placeholder="이름 입력" oninput="filterTableByName()" style="padding:9px 13px; border-radius:8px; border:1px solid #ddd; font-size:14px;">
+  </div>
+  <!-- 오른쪽: 미납자 알림톡 버튼 -->
+  <button onclick="sendUnpaidAlimtalk()" style="background:#fee500; color:#222; font-weight:600;">
+    <i class="fas fa-comment-dots"></i> 미납자 알림톡 발송
+  </button>
+</div>
+
       <div class="table-container">
         <table>
           <thead>
@@ -781,6 +795,72 @@
     carryAmount: carryAmount
   };
 }
+
+function filterTableByName() {
+  const input = document.getElementById('search-input').value.trim();
+  const rows = document.querySelectorAll('#payment-list tr');
+  rows.forEach(row => {
+    // 첫 번째 cell이 "이름"이므로, 해당 셀 값 기준으로 검색
+    if (row.cells.length < 2) return; // 타이틀/안내 row 등 건너뜀
+    const nameCell = row.cells[0].textContent;
+    if (!input || nameCell.includes(input)) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+
+
+async function sendUnpaidAlimtalk() {
+  const rows = document.querySelectorAll('#payment-list tr');
+  const month = document.getElementById('month-input').value;
+  // 실제 납부일(day) 추출 (납부일이 날짜가 아니라면 기본 '1'로)
+  let list = [];
+  rows.forEach(row => {
+    // paid-row 없는, 데이터 row만 추출
+    if (!row.classList.contains('paid-row') && row.cells.length > 1) {
+      const name = row.cells[0].textContent.trim();
+      // 전화번호를 학생 DB에서 가져와야 함 → 학생명/학년으로 studentList에서 찾기
+      // 예: studentList = [{name, grade, phone, ...}, ...]
+      let phone = '';
+      for (const s of studentList) {
+        if (s.name === name && String(s.grade) === row.cells[1].textContent.trim()) {
+          phone = s.phone;
+          break;
+        }
+      }
+      // 납부일 (기본 1일 처리)
+      let date = '1';
+      // 만약 결제일 데이터가 있으면 뽑기 (없으면 '1')
+      if (row.cells[3].querySelector('input')) {
+        const val = row.cells[3].querySelector('input').value;
+        if (val) date = Number(val.split('-')[2]).toString();
+      }
+      if (phone) list.push({ name, phone, date });
+    }
+  });
+
+  if (!list.length) {
+    alert('미납자 명단이 없습니다!');
+    return;
+  }
+
+  if (!confirm(`총 ${list.length}명에게 카카오 알림톡을 발송할까요?\n(테스트시 내 번호만 남기고 발송!)`)) return;
+
+  try {
+    const res = await fetch(`${API}/send-alimtalk`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(list)
+    });
+    const result = await res.json();
+    alert(result.message || JSON.stringify(result));
+  } catch (e) {
+    alert('서버 오류: ' + e.message);
+  }
+}
+
 
 
 
@@ -1103,62 +1183,67 @@ document.getElementById('account-total').textContent = accountTotal.toLocaleStri
     }
 
     // 납부 금액 저장
-    async function savePayment(student_id, month, session_count, btn) {
-      const tr = btn.closest('tr');
-      const amount = tr.querySelector('.amount').value;
-      const paid_at = tr.querySelector('.paid-at').value;
-      const method = tr.querySelector('.method').value;
+async function savePayment(student_id, month, session_count, btn) {
+  const tr = btn.closest('tr');
+  const amount = tr.querySelector('.amount').value;
+  const paid_at = tr.querySelector('.paid-at').value;
+  const method = tr.querySelector('.method').value;
 
-      if (!paid_at) {
-        alert('❗ 납부일자를 입력하세요');
-        tr.querySelector('.paid-at').focus();
-        return;
-      }
-      if (!method) {
-        alert('❗ 결제수단을 선택하세요');
-        tr.querySelector('.method').focus();
-        return;
-      }
-      if (!amount) {
-        alert('❗ 금액을 입력하세요');
-        tr.querySelector('.amount').focus();
-        return;
-      }
+  if (!method) {
+    alert('❗ 결제수단을 선택하세요');
+    tr.querySelector('.method').focus();
+    return;
+  }
+  if (!amount) {
+    alert('❗ 금액을 입력하세요');
+    tr.querySelector('.amount').focus();
+    return;
+  }
+  // 수정된 부분!
+  if (!paid_at && Number(amount) > 0) {
+    alert('❗ 납부일자를 입력하세요');
+    tr.querySelector('.paid-at').focus();
+    return;
+  }
 
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 처리중';
-      btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 처리중';
+  btn.disabled = true;
 
-      try {
-        const res = await fetch(`${API}/save-payment`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({
-  student_id,
-  month,
-  applied_month: month, // ✅ 추가
-  session_count,
-  amount: Number(amount),
-  is_manual: 1,
-  paid_at,
-  payment_method: method
-})
-        });
+  // 금액이 0원이면 paid_at을 null로 보냄
+  const savePaidAt = Number(amount) > 0 ? paid_at : null;
 
-        const result = await res.json();
-        if (res.ok) {
-  showTossPopup(); // ✅ 이걸로 대체
-  loadPayments();  // 다시 불러오기
-} else {
-  alert('❌ ' + (result.message || '저장에 실패했습니다'));
+  try {
+    const res = await fetch(`${API}/save-payment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        student_id,
+        month,
+        applied_month: month,
+        session_count,
+        amount: Number(amount),
+        is_manual: 1,
+        paid_at: savePaidAt,     // <- 여기가 중요!
+        payment_method: method
+      })
+    });
+
+    const result = await res.json();
+    if (res.ok) {
+      showTossPopup();
+      loadPayments();
+    } else {
+      alert('❌ ' + (result.message || '저장에 실패했습니다'));
+    }
+
+  } catch (error) {
+    alert('❌ 서버 연결에 문제가 발생했습니다: ' + error.message);
+  } finally {
+    btn.innerHTML = '<i class="fas fa-save"></i> 저장';
+    btn.disabled = false;
+  }
 }
 
-      } catch (error) {
-        alert('❌ 서버 연결에 문제가 발생했습니다: ' + error.message);
-      } finally {
-        btn.innerHTML = '<i class="fas fa-save"></i> 저장';
-        btn.disabled = false;
-      }
-    }
 
     let prepayInfo = {};
     let studentList = [];
