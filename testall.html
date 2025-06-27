@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>맥스체대입시 실기 테스트 종합 순위</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --secondary: #3498db;
+      --accent: #e74c3c;
+      --light: #ecf0f1;
+      --dark: #2c3e50;
+      --text: #333;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+      --male-bg: #e6f2ff;
+      --female-bg: #ffebee;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f5f7fa;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+    
+    .header h1 {
+      color: var(--primary);
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    
+    .tagline {
+      font-size: 1.1rem;
+      color: #666;
+      margin-bottom: 15px;
+      text-align: center;
+      font-weight: 500;
+    }
+    
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .month-select-wrapper {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      padding: 8px 15px;
+      box-shadow: var(--box-shadow);
+      font-size: 0.95rem;
+    }
+    
+    .month-select-wrapper select {
+      border: none;
+      font-size: 1rem;
+      background: transparent;
+      outline: none;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    .event-filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .event-filter {
+      padding: 8px 15px;
+      background-color: var(--light);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-weight: 500;
+      transition: var(--transition);
+      border: 1px solid #ddd;
+    }
+    
+    .event-filter:hover {
+      background-color: var(--secondary);
+      color: white;
+    }
+    
+    .event-filter.active {
+      background-color: var(--secondary);
+      color: white;
+      font-weight: 600;
+    }
+    
+    .gender-section {
+      margin-bottom: 30px;
+    }
+    
+    .gender-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      padding: 10px 15px;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+      margin-bottom: 0;
+    }
+    
+    .male-title {
+      background-color: var(--secondary);
+      color: white;
+    }
+    
+    .female-title {
+      background-color: var(--accent);
+      color: white;
+    }
+    
+    .ranking-container {
+      background-color: white;
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+      box-shadow: var(--box-shadow);
+      overflow: hidden;
+    }
+    
+    .male-ranking {
+      background-color: var(--male-bg);
+    }
+    
+    .female-ranking {
+      background-color: var(--female-bg);
+    }
+    
+    .ranking-header {
+      display: grid;
+      grid-template-columns: 60px 1fr 100px 120px 100px;
+      background-color: var(--primary);
+      color: white;
+      padding: 12px 15px;
+      font-weight: 600;
+    }
+    
+    .ranking-row {
+      display: grid;
+      grid-template-columns: 60px 1fr 100px 120px 100px;
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+      align-items: center;
+    }
+    
+    .ranking-row:nth-child(even) {
+      opacity: 0.95;
+    }
+    
+    .rank {
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    .student-name {
+      font-weight: 600;
+    }
+    
+    .student-info {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 3px;
+    }
+    
+    .score {
+      font-weight: 700;
+      text-align: right;
+    }
+    
+    .total-score {
+      color: var(--accent);
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 1.1rem;
+      color: var(--secondary);
+    }
+    
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      font-size: 1.1rem;
+      color: #666;
+    }
+    
+    .footer {
+      text-align: center;
+      padding: 30px 0;
+      margin-top: 30px;
+    }
+    
+    .footer img {
+      max-height: 120px;
+    }
+    
+    /* 반응형 */
+    @media (max-width: 768px) {
+      .ranking-header, .ranking-row {
+        grid-template-columns: 50px 1fr 80px;
+      }
+      
+      .mobile-hide {
+        display: none;
+      }
+      
+      .header h1 {
+        font-size: 1.6rem;
+      }
+      
+      .controls {
+        flex-direction: column;
+      }
+      
+      .event-filters {
+        width: 100%;
+        overflow-x: auto;
+        justify-content: flex-start;
+        padding-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 id="mainTitle">맥스체대입시 실기 테스트 종합 순위</h1>
+      <p class="tagline">전국 체대입시 1위 맥스와 함께하면, 당신의 기록이 달라집니다.</p>
+    </div>
+    
+    <div class="controls">
+      <div class="month-select-wrapper">
+        <select id="monthSelect" onchange="fetchData()"></select>
+      </div>
+      
+      <div class="event-filters" id="eventFilters">
+        <!-- 동적으로 생성될 종목 필터 버튼 -->
+      </div>
+    </div>
+    
+    <div id="rankingContainer">
+      <div class="loading">데이터를 불러오는 중입니다...</div>
+    </div>
+    
+    <div class="footer">
+      <img src="https://github.com/seanyjeong/supermax/blob/main/maxlogo.png?raw=true" alt="맥스체대입시 로고">
+    </div>
+  </div>
+
+  <script>
+    // 종목 리스트와 해당 컬럼 매핑
+    const events = [
+      { id: 'total', name: '종합 순위', valueCol: 'total_score', scoreCol: 'total_score', unit: '점', reverse: false },
+      { id: 'jump', name: '제자리멀리뛰기', valueCol: 'jump_cm', scoreCol: 'jump_score', unit: 'cm', reverse: false },
+      { id: 'run20m', name: '20m왕복달리기', valueCol: 'run20m_sec', scoreCol: 'run20m_score', unit: '초', reverse: true },
+      { id: 'sit_reach', name: '좌전굴', valueCol: 'sit_reach_cm', scoreCol: 'sit_score', unit: 'cm', reverse: false },
+      { id: 'situp', name: '윗몸일으키기', valueCol: 'situp_count', scoreCol: 'situp_score', unit: '회', reverse: false },
+      { id: 'back', name: '배근력', valueCol: 'back_strength', scoreCol: 'back_score', unit: 'kg', reverse: false },
+      { id: 'medball', name: '메디신볼던지기', valueCol: 'medball_m', scoreCol: 'medball_score', unit: 'm', reverse: false },
+      { id: 'run10m', name: '10m왕복달리기', valueCol: 'run10m_sec', scoreCol: 'run10m_score', unit: '초', reverse: true }
+    ];
+    
+    let allRecords = [];
+    let currentEvent = events[0]; // 기본은 종합 순위
+    
+    // 월 선택 드롭다운 채우기
+    function populateMonthSelect() {
+      const select = document.getElementById('monthSelect');
+      const now = new Date();
+      
+      select.innerHTML = '';
+      
+      // 최근 6개월 + 예비반
+      for (let i = 0; i < 6; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const option = document.createElement('option');
+        option.value = `${year}-${month}`;
+        option.textContent = `${year}년 ${parseInt(month)}월`;
+        select.appendChild(option);
+      }
+      
+      // 예비반 추가
+      const preOption = document.createElement('option');
+      preOption.value = '예비반';
+      preOption.textContent = '예비반 테스트';
+      select.appendChild(preOption);
+      
+      // 기본값 설정 (현재 월)
+      select.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    }
+    
+    // 종목 필터 버튼 생성
+    function populateEventFilters() {
+      const container = document.getElementById('eventFilters');
+      container.innerHTML = '';
+      
+      events.forEach(event => {
+        const button = document.createElement('div');
+        button.className = `event-filter ${event.id === currentEvent.id ? 'active' : ''}`;
+        button.textContent = event.name;
+        button.onclick = () => {
+          currentEvent = event;
+          updateRanking();
+          // 모든 버튼에서 active 클래스 제거 후 현재 버튼에 추가
+          document.querySelectorAll('.event-filter').forEach(btn => {
+            btn.classList.remove('active');
+          });
+          button.classList.add('active');
+        };
+        container.appendChild(button);
+      });
+    }
+    
+    // 현재 선택된 월 (YYYY-MM 형식)
+    function getSelectedTestMonth() {
+      const select = document.getElementById('monthSelect');
+      return select ? select.value : '';
+    }
+    
+    // 데이터 불러오기
+    async function fetchData() {
+      try {
+        const rankingContainer = document.getElementById('rankingContainer');
+        rankingContainer.innerHTML = '<div class="loading">데이터를 불러오는 중입니다...</div>';
+        
+        const selectedMonth = getSelectedTestMonth();
+        const res = await fetch(`https://supermax.kr/college/test-records?test_month=${selectedMonth}`);
+        const data = await res.json();
+        
+        if (data.success && data.records.length > 0) {
+          allRecords = data.records;
+          
+          const titleEl = document.getElementById('mainTitle');
+          if (selectedMonth === '예비반') {
+            titleEl.textContent = '맥스체대입시 예비반 종합 테스트 순위';
+          } else {
+            const [year, month] = selectedMonth.split('-');
+            titleEl.textContent = `맥스체대입시 ${year}년 ${parseInt(month)}월 종합 테스트 순위`;
+          }
+          
+          updateRanking();
+        } else {
+          rankingContainer.innerHTML = '<div class="no-data">해당 월의 테스트 데이터가 없습니다.</div>';
+        }
+      } catch (error) {
+        console.error('데이터 불러오기 오류:', error);
+        document.getElementById('rankingContainer').innerHTML = 
+          '<div class="no-data">데이터를 불러오는 중 오류가 발생했습니다.</div>';
+      }
+    }
+    
+    // 순위 생성 함수 (성별별로 분리)
+    function createRankingTable(gender) {
+      const genderRecords = allRecords.filter(record => {
+        const recordGender = record.gender;
+        if (gender === 'male') {
+          return recordGender === '남' || recordGender === '남자';
+        } else {
+          return recordGender === '여' || recordGender === '여자';
+        }
+      });
+      
+      // 데이터 정렬
+      const sortedRecords = [...genderRecords]
+        .filter(record => record[currentEvent.valueCol] != null)
+        .sort((a, b) => {
+          return currentEvent.reverse ? 
+            a[currentEvent.valueCol] - b[currentEvent.valueCol] : 
+            b[currentEvent.valueCol] - a[currentEvent.valueCol];
+        });
+      
+      // 순위 생성 (동점자 처리)
+      let ranking = [];
+      let currentRank = 1;
+      
+      for (let i = 0; i < sortedRecords.length; i++) {
+        if (i > 0 && sortedRecords[i][currentEvent.valueCol] !== sortedRecords[i-1][currentEvent.valueCol]) {
+          currentRank = i + 1;
+        }
+        ranking.push({
+          ...sortedRecords[i],
+          rank: currentRank
+        });
+      }
+      
+      // HTML 생성
+      let html = `
+        <div class="gender-section">
+          <h3 class="gender-title ${gender === 'male' ? 'male-title' : 'female-title'}">
+            ${gender === 'male' ? '남학생 순위' : '여학생 순위'}
+          </h3>
+          <div class="ranking-container ${gender === 'male' ? 'male-ranking' : 'female-ranking'}">
+            <div class="ranking-header">
+              <div>순위</div>
+              <div>이름</div>
+              <div class="mobile-hide">학교/학년</div>
+              <div>성별</div>
+              <div>${currentEvent.name} (${currentEvent.unit})</div>
+            </div>
+      `;
+      
+      if (ranking.length === 0) {
+        html += '<div class="no-data">표시할 데이터가 없습니다.</div>';
+      } else {
+        ranking.forEach(student => {
+          const genderText = gender === 'male' ? '남' : '여';
+          
+          // 기록 값 포맷팅 (달리기 종목은 소수점 2자리까지 표시)
+          let displayValue = student[currentEvent.valueCol];
+          if (currentEvent.unit === '초') {
+            displayValue = parseFloat(displayValue).toFixed(2);
+          }
+          
+          html += `
+            <div class="ranking-row">
+              <div class="rank">${student.rank}</div>
+              <div>
+                <div class="student-name">${student.name}</div>
+                <div class="student-info mobile-hide">${student.school || ''} ${student.grade || ''}</div>
+              </div>
+              <div class="mobile-hide">${student.school || ''} ${student.grade || ''}</div>
+              <div>${genderText}</div>
+              <div class="score ${currentEvent.id === 'total' ? 'total-score' : ''}">
+                ${displayValue}${currentEvent.unit}
+              </div>
+            </div>
+          `;
+        });
+      }
+      
+      html += `
+          </div>
+        </div>
+      `;
+      
+      return html;
+    }
+    
+    // 순위 업데이트 (남녀별로 분리하여 표시)
+    function updateRanking() {
+      if (allRecords.length === 0) return;
+      
+      const rankingContainer = document.getElementById('rankingContainer');
+      
+      // 남학생, 여학생 테이블 생성
+      rankingContainer.innerHTML = `
+        ${createRankingTable('male')}
+        ${createRankingTable('female')}
+      `;
+    }
+    
+    // 페이지 로드 시 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+      populateMonthSelect();
+      populateEventFilters();
+      fetchData();
+      
+      // 1분마다 데이터 갱신
+      setInterval(fetchData, 60000);
+    });
+  </script>
+</body>
+</html>
