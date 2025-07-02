@@ -1087,7 +1087,11 @@ data.forEach(row => {
   const isCurrentMonth = (selectedMonth.getMonth() === now.getMonth() && selectedMonth.getFullYear() === now.getFullYear());
 
   // 1. 등록일 체크 (이미 네가 하는대로)
-  if (registered > selectedMonth) return;
+
+const selectedMonthEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
+
+if (registered > selectedMonthEnd) return;
+
 
   // 2. 휴식/퇴원 체크
   if (row.status === '휴식' || row.status === '퇴원') return;
