@@ -2,95 +2,464 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>멘탈 자가 체크</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
-    body { max-width: 480px; margin: auto; font-size: 16px; }
-    label { margin-top: 1em; display: block; }
-    select, input, textarea, button { font-size: 1.1em; width: 100%; }
-    textarea { resize: vertical; }
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --accent-color: #4895ef;
+      --success-color: #00c853;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+      --border-radius: 12px;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--dark-color);
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      max-width: 100%;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      font-size: 1.5rem;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    .form-card {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 25px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    /* 제출 완료 화면 스타일 */
+    .success-card {
+      display: none;
+      text-align: center;
+      padding: 30px;
+    }
+
+    .success-icon {
+      font-size: 60px;
+      color: var(--success-color);
+      margin-bottom: 20px;
+      animation: bounce 0.8s;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+      40% {transform: translateY(-20px);}
+      60% {transform: translateY(-10px);}
+    }
+
+    .success-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--dark-color);
+      margin-bottom: 10px;
+    }
+
+    .success-message {
+      color: #666;
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+
+    .success-details {
+      background-color: #f8f9fa;
+      border-radius: var(--border-radius);
+      padding: 15px;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .detail-label {
+      color: #666;
+    }
+
+    /* 폼 스타일 */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #444;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      padding: 14px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      width: 100%;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: var(--secondary-color);
+    }
+
+    .help-text {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .alert {
+      padding: 12px 15px;
+      border-radius: var(--border-radius);
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .alert-warning {
+      background-color: #fff3cd;
+      color: #856404;
+      border-left: 4px solid #ffeeba;
+    }
+
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border-left: 4px solid #c3e6cb;
+    }
+
+    .student-name-input {
+      display: flex;
+      gap: 10px;
+    }
+
+    .student-name-input input {
+      flex: 1;
+    }
+
+    .student-name-input button {
+      width: auto;
+      padding: 0 15px;
+      background-color: #6c757d;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .form-card {
+        padding: 20px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h2>🧠 멘탈 자가 체크</h2>
+  <div class="container">
+    <div id="alertBox" class="alert"></div>
 
-  <form id="mentalForm">
-    <label>학생 선택
-      <select name="student_id" id="studentSelect" required></select>
-    </label>
+    <header>
+      <h1><i class="fas fa-brain"></i> 일산맥스 멘탈 자가 체크</h1>
+      <div class="subtitle">본인의 정확한상태를 체크해주세요</div>
+    </header>
 
-    <label>수면 시간 (시간)
-      <input type="number" name="sleep_hours" step="0.5" min="0" max="24">
-    </label>
+    <div class="form-card" id="formContainer">
+      <form id="mentalForm">
+        <div class="form-group">
+          <label for="studentName">학생 이름</label>
+          <div class="student-name-input">
+            <input type="text" id="studentName" name="student_name" placeholder="본인의 이름을 정확히 입력" required>
+            <button type="button" id="checkNameBtn"><i class="fas fa-search"></i></button>
+          </div>
+          <div class="help-text">등록된 이름과 정확히 일치해야 합니다</div>
+          <input type="hidden" id="studentId" name="student_id">
+        </div>
 
-    <label>스트레스 정도 (1~5)
-      <input type="number" name="stress_level" min="1" max="5" required>
-    </label>
+        <div class="form-group">
+          <label for="sleepHours">수면 시간 (시간)</label>
+          <input type="number" id="sleepHours" name="sleep_hours" step="0.5" min="0" max="24" placeholder="예: 6.5">
+        </div>
 
-    <label>훈련 의욕 (1~5)
-      <input type="number" name="motivation_level" min="1" max="5" required>
-    </label>
+        <div class="form-group">
+          <label for="stressLevel">스트레스 정도 (1~5)</label>
+          <input type="number" id="stressLevel" name="stress_level" min="1" max="5" required>
+          <div class="help-text">1: 매우 낮음, 5: 매우 높음</div>
+        </div>
 
-    <label>컨디션 (1~5)
-      <input type="number" name="condition_level" min="1" max="5" required>
-    </label>
+        <div class="form-group">
+          <label for="motivationLevel">대학진학 의욕 (1~5)</label>
+          <input type="number" id="motivationLevel" name="motivation_level" min="1" max="5" required>
+          <div class="help-text">1: 매우 낮음, 5: 매우 높음</div>
+        </div>
 
-    <label>통증 정도 (1~5)
-      <input type="number" name="pain_level" min="1" max="5" required>
-    </label>
+        <div class="form-group">
+          <label for="conditionLevel">컨디션 (1~5)</label>
+          <input type="number" id="conditionLevel" name="condition_level" min="1" max="5" required>
+          <div class="help-text">1: 매우 나쁨, 5: 매우 좋음</div>
+        </div>
 
-    <label>집중력 (1~5)
-      <input type="number" name="focus_level" min="1" max="5" required>
-    </label>
+        <div class="form-group">
+          <label for="painLevel">부상 통증정도 (1~5)</label>
+          <input type="number" id="painLevel" name="pain_level" min="1" max="5" required>
+          <div class="help-text">1: 없음, 5: 매우 심함</div>
+        </div>
 
-    <label>학습 집중도 (1~5)
-      <input type="number" name="study_level" min="1" max="5" required>
-    </label>
+        <div class="form-group">
+          <label for="focusLevel">운동 집중도 (1~5)</label>
+          <input type="number" id="focusLevel" name="focus_level" min="1" max="5" required>
+          <div class="help-text">1: 매우 낮음, 5: 매우 높음</div>
+        </div>
 
-    <label>기타 메모
-      <textarea name="note" rows="3" placeholder="기타 내용이 있다면 적어주세요."></textarea>
-    </label>
+        <div class="form-group">
+          <label for="studyLevel">학습 집중도 (1~5)</label>
+          <input type="number" id="studyLevel" name="study_level" min="1" max="5" required>
+          <div class="help-text">1: 매우 낮음, 5: 매우 높음</div>
+        </div>
 
-    <button type="submit">제출하기</button>
-  </form>
+        <div class="form-group">
+          <label for="note">기타 메모</label>
+          <textarea id="note" name="note" placeholder="기타 내용 또는 부상부위등이 있다면 적어주세요."></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn">제출하기</button>
+      </form>
+      <div id="submitAlert" class="alert alert-warning" style="display: none;"></div>
+
+    </div>
+
+    <!-- 제출 완료 화면 -->
+    <div class="form-card success-card" id="successContainer">
+      <div class="success-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="success-title">제출이 완료되었습니다!</div>
+      <div class="success-message">
+        오늘도 고생했어! 선생님들은 항상 너희들을 응원해!<br>
+        멘탈 관리는 굉장히 중요한 요소이니, 항상 흔들리지 않도록 
+        쌤들이 도와줄께!
+      </div>
+      
+      <div class="success-details" id="successDetails">
+        <!-- 제출한 내용이 동적으로 채워집니다 -->
+      </div>
+    </div>
+  </div>
 
   <script>
     const BASE_URL = 'https://supermax.kr/college';
+    let allStudents = [];
 
     async function loadStudents() {
-      const res = await fetch(`${BASE_URL}/students`);
-      const students = await res.json();
-      const select = document.getElementById('studentSelect');
-      select.innerHTML = '<option value="">-- 선택 --</option>';
-      students.forEach(s => {
-        const option = document.createElement('option');
-        option.value = s.id;
-        option.textContent = `${s.name} (${s.school}, ${s.grade})`;
-        select.appendChild(option);
-      });
+      try {
+        const response = await fetch(`${BASE_URL}/students`);
+        allStudents = await response.json();
+      } catch (error) {
+        showAlert('학생 목록을 불러오는 데 실패했습니다. 나중에 다시 시도해주세요.', 'warning');
+        console.error('학생 목록 로딩 오류:', error);
+      }
     }
+
+    function showAlert(message, type = 'warning') {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.innerHTML = `
+        <i class="fas fa-${type === 'warning' ? 'exclamation-circle' : 'check-circle'}"></i> ${message}
+      `;
+      alertBox.className = `alert alert-${type}`;
+      alertBox.style.display = 'block';
+      setTimeout(() => {
+        alertBox.style.display = 'none';
+      }, 5000);
+    }
+
+    document.getElementById('checkNameBtn').addEventListener('click', async () => {
+      const nameInput = document.getElementById('studentName');
+      const studentName = nameInput.value.trim();
+      
+      if (!studentName) {
+        showAlert('학생 이름을 입력해주세요.');
+        return;
+      }
+
+      const foundStudent = allStudents.find(student => 
+        student.name.trim() === studentName
+      );
+
+      if (foundStudent) {
+        document.getElementById('studentId').value = foundStudent.id;
+        showAlert(`${foundStudent.name} 학생 확인되었습니다.`, 'success');
+      } else {
+        document.getElementById('studentId').value = '';
+        showAlert(`
+          등록된 학생을 찾을 수 없습니다.<br>
+          1. 이름을 정확히 입력했는지 확인해주세요<br>
+          2. 그래도 안되면 원장님께 문의해주세요
+        `, 'warning');
+      }
+    });
 
     document.getElementById('mentalForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 제출 중...';
+
       const formData = new FormData(e.target);
       const payload = Object.fromEntries(formData.entries());
 
-      // 날짜 자동 삽입
+      if (!payload.student_id) {
+        showAlert('학생 확인을 먼저 해주세요.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '제출하기';
+        return;
+      }
+
       payload.submitted_at = new Date().toISOString().split('T')[0];
 
-      const res = await fetch(`${BASE_URL}/mental-check`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      try {
+        const res = await fetch(`${BASE_URL}/mental-check`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
 
-      const result = await res.json();
-      alert(result.message || '제출 완료!');
-      e.target.reset();
+        const result = await res.json();
+        
+if (res.ok) {
+  showSuccessScreen(payload);
+} else {
+  showSubmitAlert(result.message || '제출에 실패했습니다.');
+  submitBtn.disabled = false;
+  submitBtn.innerHTML = '제출하기';
+}
+
+      } catch (error) {
+        showAlert('네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.', 'warning');
+        console.error('제출 오류:', error);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '제출하기';
+      }
     });
 
-    loadStudents();
+    function showSubmitAlert(message) {
+  const box = document.getElementById('submitAlert');
+  box.textContent = message;
+  box.style.display = 'block';
+  setTimeout(() => {
+    box.style.display = 'none';
+  }, 5000);
+}
+
+
+    function showSuccessScreen(formData) {
+      document.getElementById('formContainer').style.display = 'none';
+      
+      const detailsContainer = document.getElementById('successDetails');
+      detailsContainer.innerHTML = `
+        <div class="detail-item">
+          <span class="detail-label">학생 이름</span>
+          <span>${formData.student_name}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">수면 시간</span>
+          <span>${formData.sleep_hours || '0'}시간</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">스트레스 정도</span>
+          <span>${formData.stress_level}/5</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">훈련 의욕</span>
+          <span>${formData.motivation_level}/5</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">컨디션</span>
+          <span>${formData.condition_level}/5</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">부상 통증</span>
+          <span>${formData.pain_level}/5</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">운동 집중력</span>
+          <span>${formData.focus_level}/5</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">학습 집중도</span>
+          <span>${formData.study_level}/5</span>
+        </div>
+        ${formData.note ? `
+        <div class="detail-item" style="flex-direction: column; align-items: flex-start;">
+          <span class="detail-label">기타 메모</span>
+          <span>${formData.note}</span>
+        </div>
+        ` : ''}
+      `;
+      
+      document.getElementById('successContainer').style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', loadStudents);
   </script>
 </body>
 </html>
