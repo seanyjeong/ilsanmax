@@ -2,74 +2,242 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>전체 학생 목록</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    table { width: 100%; }
-    td, th { text-align: center; }
-    input { width: 300px; padding: 8px; margin-bottom: 20px; }
-    .clickable { color: blue; cursor: pointer; text-decoration: underline; }
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --accent-color: #4895ef;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+      --success-color: #4cc9f0;
+      --warning-color: #f8961e;
+      --danger-color: #f72585;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--dark-color);
+      background-color: #f5f7fa;
+      padding: 0;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      background-color: white;
+      box-shadow: var(--box-shadow);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      margin-bottom: 20px;
+    }
+
+    h1, h2, h3 {
+      color: var(--primary-color);
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: 24px;
+      border-bottom: 2px solid var(--accent-color);
+      padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .search-box {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 15px;
+      top: 12px;
+      color: #999;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 15px 10px 40px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    .student-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .student-table th {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 12px 15px;
+      text-align: left;
+      font-weight: 500;
+    }
+
+    .student-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .student-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .student-table tr:hover {
+      background-color: #f1f5ff;
+    }
+
+    .student-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .student-link:hover {
+      color: var(--secondary-color);
+      text-decoration: underline;
+    }
+
+    .empty-message {
+      text-align: center;
+      padding: 30px;
+      color: #777;
+      font-style: italic;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: #777;
+    }
   </style>
 </head>
 <body>
-  <h2>전체 학생 목록</h2>
-  <input type="text" id="searchInput" placeholder="이름 또는 학교로 검색" />
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-users"></i> 전체 학생 목록</h1>
+    </header>
 
-  <table>
-    <thead>
-      <tr>
-        <th>이름</th>
-        <th>학교</th>
-        <th>학년</th>
-        <th>성별</th>
-        <th>수시/정시</th>
-        <th>현재 강사</th>
-      </tr>
-    </thead>
-    <tbody id="studentList"></tbody>
-  </table>
+    <div class="card">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" class="search-input" placeholder="이름 또는 학교로 검색">
+      </div>
+
+      <table class="student-table">
+        <thead>
+          <tr>
+            <th>이름</th>
+            <th>학교</th>
+            <th>학년</th>
+            <th>성별</th>
+            <th>수시/정시</th>
+            <th>담당 강사</th>
+          </tr>
+        </thead>
+        <tbody id="studentList">
+          <tr>
+            <td colspan="6" class="loading">학생 목록을 불러오는 중...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
   <script>
     const BASE_URL = 'https://supermax.kr/college';
     let students = [];
 
     async function loadStudents() {
-      const res = await fetch(`${BASE_URL}/students`);
-      students = await res.json();
-      renderList(students);
+      try {
+        const res = await fetch(`${BASE_URL}/students`);
+        students = await res.json();
+        renderList(students);
+      } catch (error) {
+        document.getElementById('studentList').innerHTML = `
+          <tr>
+            <td colspan="6" class="empty-message">학생 목록을 불러오는 데 실패했습니다.</td>
+          </tr>
+        `;
+        console.error('학생 목록 로딩 오류:', error);
+      }
     }
 
     function renderList(list) {
       const tbody = document.getElementById('studentList');
+      
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="empty-message">검색 결과가 없습니다.</td>
+          </tr>
+        `;
+        return;
+      }
+
       tbody.innerHTML = '';
-      list.forEach(s => {
+      list.forEach(student => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td class="clickable" onclick="goToDetail(${s.id})">${s.name}</td>
-          <td>${s.school || '-'}</td>
-          <td>${s.grade || '-'}</td>
-          <td>${s.gender || '-'}</td>
-          <td>${s.lesson_type || '-'}</td>
-          <td>${s.instructor_name || '-'}</td>
+          <td>
+            <a href="student-detail.html?id=${student.id}" class="student-link">
+              <i class="fas fa-user-graduate"></i>
+              ${student.name}
+            </a>
+          </td>
+          <td>${student.school || '-'}</td>
+          <td>${student.grade || '-'}</td>
+          <td>${student.gender || '-'}</td>
+          <td>${student.lesson_type || '-'}</td>
+          <td>${student.instructor_name || '-'}</td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    function goToDetail(id) {
-      window.location.href = `student-detail.html?id=${id}`;
-    }
-
     document.getElementById('searchInput').addEventListener('input', e => {
       const keyword = e.target.value.toLowerCase();
       const filtered = students.filter(s =>
-        s.name.toLowerCase().includes(keyword) ||
+        (s.name && s.name.toLowerCase().includes(keyword)) ||
         (s.school && s.school.toLowerCase().includes(keyword))
       );
       renderList(filtered);
     });
 
-    loadStudents();
+    document.addEventListener('DOMContentLoaded', loadStudents);
   </script>
 </body>
 </html>
