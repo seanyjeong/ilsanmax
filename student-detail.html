@@ -1,33 +1,257 @@
-<!-- student-detail.html -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>학생 상세 정보</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <style>
-    .info-box { border: 1px solid #ccc; padding: 1em; margin-bottom: 1em; }
-    canvas { max-width: 100%; }
-    h3 { margin-top: 2em; }
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --accent-color: #4895ef;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+      --success-color: #4cc9f0;
+      --warning-color: #f8961e;
+      --danger-color: #f72585;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--dark-color);
+      background-color: #f5f7fa;
+      padding: 0;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      background-color: white;
+      box-shadow: var(--box-shadow);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      margin-bottom: 20px;
+    }
+
+    h1, h2, h3, h4 {
+      color: var(--primary-color);
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: 24px;
+      border-bottom: 2px solid var(--accent-color);
+      padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin: 30px 0 15px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin: 25px 0 15px;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      color: var(--secondary-color);
+    }
+
+    .card-title i {
+      font-size: 1.2em;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
+    .info-item {
+      display: flex;
+      gap: 10px;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: var(--secondary-color);
+      min-width: 80px;
+    }
+
+    /* 모의고사 표 스타일 */
+    .exam-table-container {
+      overflow-x: auto;
+      margin-top: 15px;
+    }
+
+    .exam-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+    }
+
+    .exam-table th {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 12px 15px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .exam-table td {
+      padding: 10px 15px;
+      border-bottom: 1px solid #e0e0e0;
+      text-align: center;
+    }
+
+    .exam-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .exam-table tr:hover {
+      background-color: #f1f5ff;
+    }
+
+    .subject-name {
+      font-weight: 600;
+      color: var(--secondary-color);
+      text-align: left;
+    }
+
+    .exam-month {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .chart-container {
+      margin: 20px 0;
+      position: relative;
+      height: 300px;
+    }
+
+    .mental-check {
+      border-left: 4px solid var(--accent-color);
+      padding-left: 15px;
+      margin-bottom: 15px;
+    }
+
+    .mental-status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-left: 5px;
+    }
+
+    .status-normal {
+      background-color: #e6f7ee;
+      color: #00a854;
+    }
+
+    .status-warning {
+      background-color: #fff7e6;
+      color: #fa8c16;
+    }
+
+    .status-danger {
+      background-color: #fff1f0;
+      color: #f5222d;
+    }
+
+    .status-critical {
+      background-color: #fce8e8;
+      color: #cf1322;
+    }
+
+    .loading {
+      color: #999;
+      font-style: italic;
+    }
+
+    .ai-analysis {
+      background-color: #f0f7ff;
+      border-left: 4px solid var(--accent-color);
+      padding: 15px;
+      border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    }
+
+    .ai-title {
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
-  <h2>📋 학생 상세 정보</h2>
-  <div class="info-box" id="basicInfo">불러오는 중...</div>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-user-graduate"></i> 학생 상세 정보</h1>
+    </header>
 
-  <h3>📊 모의고사 성적 (3, 6, 9월)</h3>
-  <div class="info-box" id="examScores">불러오는 중...</div>
+    <section>
+      <div class="card">
+        <div class="card-title"><i class="fas fa-id-card"></i> 기본 정보</div>
+        <div class="info-grid" id="basicInfo">
+          <div class="loading">불러오는 중...</div>
+        </div>
+      </div>
 
-  <h3>🏃 실기 기록</h3>
-  <div class="info-box" id="recordScores">불러오는 중...</div>
+      <div class="card">
+        <div class="card-title"><i class="fas fa-chart-line"></i> 모의고사 성적 (3, 6, 9월)</div>
+        <div id="examScores">
+          <div class="loading">불러오는 중...</div>
+        </div>
+      </div>
 
-  <h3>🧠 AI 실기 분석</h3>
-  <div class="info-box" id="gptComment">분석 조건 확인 중...</div>
+      <div class="card">
+        <div class="card-title"><i class="fas fa-running"></i> 실기 기록</div>
+        <div id="recordScores">
+          <div class="loading">불러오는 중...</div>
+        </div>
+      </div>
 
-  <h3>🧠 멘탈 자가 체크 이력</h3>
-  <div class="info-box" id="mentalChecks">불러오는 중...</div>
+      <div class="card">
+        <div class="card-title"><i class="fas fa-brain"></i> AI 실기 분석</div>
+        <div class="ai-analysis" id="gptComment">
+          분석 조건 확인 중...
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="fas fa-heartbeat"></i> 멘탈 자가 체크 이력</div>
+        <div id="mentalChecks">
+          <div class="loading">불러오는 중...</div>
+        </div>
+      </div>
+    </section>
+  </div>
 
   <script>
     const BASE_URL = 'https://supermax.kr/college';
@@ -40,42 +264,117 @@
     async function loadBasicInfo() {
       const res = await fetch(`${BASE_URL}/students/${studentId}`);
       const data = await res.json();
+      
       document.getElementById('basicInfo').innerHTML = `
-        <strong>이름:</strong> ${data.name}<br>
-        <strong>학교:</strong> ${data.school}<br>
-        <strong>학년:</strong> ${data.grade}<br>
-        <strong>성별:</strong> ${data.gender}<br>
-        <strong>수시/정시:</strong> ${data.lesson_type}<br>
-        <strong>담당 강사:</strong> ${data.instructor_name || '-'}`;
+        <div class="info-item">
+          <span class="info-label">이름:</span>
+          <span>${data.name}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">학교:</span>
+          <span>${data.school}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">학년:</span>
+          <span>${data.grade}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">성별:</span>
+          <span>${data.gender}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">수시/정시:</span>
+          <span>${data.lesson_type}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">담당 강사:</span>
+          <span>${data.instructor_name || '-'}</span>
+        </div>`;
     }
 
-    async function loadExamScores() {
-      const res = await fetch(`${BASE_URL}/mock-score/${studentId}`);
-      const allScores = await res.json();
-      const months = ['3월', '6월', '9월'];
-      const container = document.getElementById('examScores');
-      container.innerHTML = '';
+   async function loadExamScores() {
+  const res = await fetch(`${BASE_URL}/mock-score/${studentId}`);
+  const allScores = await res.json();
+  const months = ['3월', '6월', '9월'];
+  const container = document.getElementById('examScores');
+  container.innerHTML = '';
 
-      months.forEach(month => {
-        const score = allScores.find(s => s.exam_month === month);
-        if (!score) return;
-        container.innerHTML += `
-          <strong>📅 ${month} 모의고사</strong><br>
-          - 국어 (${score.korean_subject}): 표준 ${score.korean_standard_score}, 백분위 ${score.korean_percentile}, 등급 ${score.korean_grade}<br>
-          - 수학 (${score.math_subject}): 표준 ${score.math_standard_score}, 백분위 ${score.math_percentile}, 등급 ${score.math_grade}<br>
-          - 영어: 등급 ${score.english_grade}<br>
-          - 탐구1 (${score.inquiry1_subject}): 표준 ${score.inquiry1_standard_score}, 백분위 ${score.inquiry1_percentile}, 등급 ${score.inquiry1_grade}<br>
-          - 탐구2 (${score.inquiry2_subject}): 표준 ${score.inquiry2_standard_score}, 백분위 ${score.inquiry2_percentile}, 등급 ${score.inquiry2_grade}<br>
-          - 한국사: 등급 ${score.history_grade}<br><br>`;
-      });
-    }
+  months.forEach(month => {
+    const score = allScores.find(s => s.exam_month === month);
+    if (!score) return;
+
+    const table = `
+      <h3 class="exam-month">${month} 모의고사</h3>
+      <div class="exam-table-container">
+        <table class="exam-table">
+          <thead>
+            <tr>
+              <th>항목</th>
+              <th>국어</th>
+              <th>수학</th>
+              <th>영어</th>
+              <th>탐구1</th>
+              <th>탐구2</th>
+              <th>한국사</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="subject-name">세부과목</td>
+              <td>${score.korean_subject || '-'}</td>
+              <td>${score.math_subject || '-'}</td>
+              <td>-</td>
+              <td>${score.inquiry1_subject || '-'}</td>
+              <td>${score.inquiry2_subject || '-'}</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td class="subject-name">표준점수</td>
+              <td>${score.korean_standard_score ?? '-'}</td>
+              <td>${score.math_standard_score ?? '-'}</td>
+              <td>-</td>
+              <td>${score.inquiry1_standard_score ?? '-'}</td>
+              <td>${score.inquiry2_standard_score ?? '-'}</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td class="subject-name">백분위</td>
+              <td>${score.korean_percentile ?? '-'}</td>
+              <td>${score.math_percentile ?? '-'}</td>
+              <td>-</td>
+              <td>${score.inquiry1_percentile ?? '-'}</td>
+              <td>${score.inquiry2_percentile ?? '-'}</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td class="subject-name">등급</td>
+              <td>${score.korean_grade ?? '-'}</td>
+              <td>${score.math_grade ?? '-'}</td>
+              <td>${score.english_grade ?? '-'}</td>
+              <td>${score.inquiry1_grade ?? '-'}</td>
+              <td>${score.inquiry2_grade ?? '-'}</td>
+              <td>${score.history_grade ?? '-'}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
+    container.innerHTML += table;
+  });
+
+  if (container.innerHTML === '') {
+    container.innerHTML = '<div class="loading">모의고사 성적 없음</div>';
+  }
+}
+
 
     async function loadRecordScores() {
       const res = await fetch(`${BASE_URL}/physical-record/${studentId}`);
       const data = await res.json();
       const container = document.getElementById('recordScores');
+      
       if (!Array.isArray(data) || data.length === 0) {
-        container.textContent = '실기 기록 없음';
+        container.innerHTML = '<div class="loading">실기 기록 없음</div>';
         document.getElementById('gptComment').textContent = '실기 기록 없음';
         return;
       }
@@ -114,8 +413,10 @@
 
         const block = document.createElement('div');
         block.innerHTML = `
-          <h4>${event}</h4>
-          <canvas id="chart-${safeId}"></canvas>
+          <h3>${event}</h3>
+          <div class="chart-container">
+            <canvas id="chart-${safeId}"></canvas>
+          </div>
         `;
         container.appendChild(block);
 
@@ -130,6 +431,8 @@
             datasets: [{
               label: event,
               data: values,
+              borderColor: '#4361ee',
+              backgroundColor: 'rgba(67, 97, 238, 0.1)',
               tension: 0.3,
               fill: false,
               datalabels: {
@@ -140,12 +443,19 @@
           },
           options: {
             plugins: {
+              legend: {
+                display: false
+              },
               datalabels: {
                 formatter: value => value.toFixed(decimal),
-                font: { weight: 'bold' }
+                font: { 
+                  weight: 'bold',
+                  size: 12
+                }
               }
             },
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
               y: {
                 beginAtZero: false,
@@ -155,6 +465,14 @@
                   stepSize: (values.length === 2) ? Math.abs(values[1] - values[0]) : undefined,
                   min: (values.length === 2) ? Math.min(...values) : undefined,
                   max: (values.length === 2) ? Math.max(...values) : undefined
+                },
+                grid: {
+                  color: 'rgba(0, 0, 0, 0.05)'
+                }
+              },
+              x: {
+                grid: {
+                  color: 'rgba(0, 0, 0, 0.05)'
                 }
               }
             }
@@ -165,7 +483,7 @@
         chartRefs[safeId] = chart;
       }
 
-      // ✅ GPT 분석 조건
+      // GPT 분석 조건 확인
       const totalValid = data.filter(r => !isNaN(parseFloat(r.record_value))).length;
       if (totalValid < 3) {
         document.getElementById('gptComment').textContent = '분석을 위해 최소 3개 이상의 기록이 필요합니다.';
@@ -174,45 +492,42 @@
       }
     }
 
-async function loadGptComment() {
-  console.log("🔍 [loadGptComment] 호출됨, studentId:", studentId);
+    async function loadGptComment() {
+      try {
+        const res = await fetch(`${BASE_URL}/analyze-comment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ student_id: studentId })
+        });
 
-  try {
-    const res = await fetch('https://supermax.kr/college/analyze-comment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ student_id: studentId })
-    });
+        if (!res.ok) {
+          const err = await res.text();
+          document.getElementById('gptComment').innerHTML = '분석 실패 (서버 응답 오류)';
+          return;
+        }
 
-    if (!res.ok) {
-      const err = await res.text();
-      console.error("❌ 응답 오류:", res.status, err);
-      document.getElementById('gptComment').innerHTML = '분석 실패 (서버 응답 오류)';
-      return;
+        const data = await res.json();
+        document.getElementById('gptComment').innerHTML = `
+          <div class="ai-title">AI 분석 결과</div>
+          <div>${data.comment}</div>`;
+      } catch (err) {
+        document.getElementById('gptComment').innerHTML = '분석 결과를 받아오지 못했습니다. (네트워크 오류)';
+      }
     }
-
-    const data = await res.json();
-    console.log("📥 GPT 응답:", data);
-    document.getElementById('gptComment').innerHTML = `<strong>🧠 AI 분석:</strong><br>${data.comment}`;
-
-  } catch (err) {
-    console.error("❌ GPT API 호출 실패:", err);
-    document.getElementById('gptComment').innerHTML = '❌ 분석 결과를 받아오지 못했습니다. (네트워크 오류)';
-  }
-}
-
-
 
     async function loadMentalChecks() {
       const res = await fetch(`${BASE_URL}/mental-check/${studentId}`);
       const data = await res.json();
       const container = document.getElementById('mentalChecks');
+      
       if (!Array.isArray(data) || data.length === 0) {
-        container.textContent = '데이터 없음';
+        container.innerHTML = '<div class="loading">데이터 없음</div>';
         return;
       }
 
-      const entries = data.map(entry => {
+      container.innerHTML = '';
+      
+      data.forEach(entry => {
         const {
           submitted_at, sleep_hours, stress_level, motivation_level,
           condition_level, pain_level, focus_level, study_level, note
@@ -227,34 +542,50 @@ async function loadGptComment() {
           (stress_level || 0) -
           (pain_level || 0);
 
-        let status = '';
-        if (score >= 13) status = '✅ 정상';
-        else if (score >= 10) status = '⚠️ 관심 필요';
-        else if (score >= 6) status = '❗ 관리 필요';
-        else status = '🔥 심각';
+        let statusClass = '';
+        let statusText = '';
+        
+        if (score >= 13) {
+          statusClass = 'status-normal';
+          statusText = '정상';
+        } else if (score >= 10) {
+          statusClass = 'status-warning';
+          statusText = '관심 필요';
+        } else if (score >= 6) {
+          statusClass = 'status-danger';
+          statusText = '관리 필요';
+        } else {
+          statusClass = 'status-critical';
+          statusText = '심각';
+        }
 
-        return `
-          <div style="margin-bottom:1em;">
-            <strong>${submitted_at}</strong><br>
-            총점: ${score} → <strong>${status}</strong><br>
-            - 수면: ${sleep_hours}시간<br>
-            - 스트레스: ${stress_level} / 5<br>
-            - 의욕: ${motivation_level} / 5<br>
-            - 컨디션: ${condition_level} / 5<br>
-            - 통증: ${pain_level} / 5<br>
-            - 집중: ${focus_level} / 5<br>
-            - 학습: ${study_level} / 5<br>
-            메모: ${note || '없음'}
-          </div>`;
+        const entryElement = document.createElement('div');
+        entryElement.className = 'mental-check';
+        entryElement.innerHTML = `
+          <div><strong>${submitted_at}</strong> <span class="mental-status ${statusClass}">${statusText} (${score}점)</span></div>
+          <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+            <div><small>수면:</small> ${sleep_hours}시간</div>
+            <div><small>스트레스:</small> ${stress_level}/5</div>
+            <div><small>의욕:</small> ${motivation_level}/5</div>
+            <div><small>컨디션:</small> ${condition_level}/5</div>
+            <div><small>통증:</small> ${pain_level}/5</div>
+            <div><small>집중:</small> ${focus_level}/5</div>
+            <div><small>학습:</small> ${study_level}/5</div>
+          </div>
+          ${note ? `<div style="margin-top: 10px;"><small>메모:</small> ${note}</div>` : ''}
+        `;
+        
+        container.appendChild(entryElement);
       });
-
-      container.innerHTML = entries[0];
     }
 
-    loadBasicInfo();
-    loadExamScores();
-    loadRecordScores();
-    loadMentalChecks();
+    // 페이지 로드 시 데이터 불러오기
+    document.addEventListener('DOMContentLoaded', () => {
+      loadBasicInfo();
+      loadExamScores();
+      loadRecordScores();
+      loadMentalChecks();
+    });
   </script>
 </body>
 </html>
