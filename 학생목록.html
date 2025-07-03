@@ -15,6 +15,7 @@
       --success-color: #4cc9f0;
       --warning-color: #f8961e;
       --danger-color: #f72585;
+      --female-color: #ff6b9d; /* 여학생용 핑크색 */
       --border-radius: 8px;
       --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
@@ -126,9 +127,18 @@
       gap: 8px;
     }
 
+    /* 여학생 링크 스타일 */
+    .student-link.female {
+      color: var(--female-color);
+    }
+
     .student-link:hover {
-      color: var(--secondary-color);
       text-decoration: underline;
+    }
+
+    /* 여학생 아이콘 색상 */
+    .fa-user-graduate.female {
+      color: var(--female-color);
     }
 
     .empty-message {
@@ -210,11 +220,15 @@
 
       tbody.innerHTML = '';
       list.forEach(student => {
+        const isFemale = student.gender === '여';
+        const iconClass = isFemale ? 'fa-user-graduate female' : 'fa-user-graduate';
+        const linkClass = isFemale ? 'student-link female' : 'student-link';
+        
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>
-            <a href="student-detail.html?id=${student.id}" class="student-link">
-              <i class="fas fa-user-graduate"></i>
+            <a href="student-detail.html?id=${student.id}" class="${linkClass}">
+              <i class="fas ${iconClass}"></i>
               ${student.name}
             </a>
           </td>
