@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>멘탈 자가 체크</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css" />
+  <style>
+    body { max-width: 480px; margin: auto; font-size: 16px; }
+    label { margin-top: 1em; display: block; }
+    select, input, textarea, button { font-size: 1.1em; width: 100%; }
+    textarea { resize: vertical; }
+  </style>
+</head>
+<body>
+  <h2>🧠 멘탈 자가 체크</h2>
+
+  <form id="mentalForm">
+    <label>학생 선택
+      <select name="student_id" id="studentSelect" required></select>
+    </label>
+
+    <label>수면 시간 (시간)
+      <input type="number" name="sleep_hours" step="0.5" min="0" max="24">
+    </label>
+
+    <label>스트레스 정도 (1~5)
+      <input type="number" name="stress_level" min="1" max="5" required>
+    </label>
+
+    <label>훈련 의욕 (1~5)
+      <input type="number" name="motivation_level" min="1" max="5" required>
+    </label>
+
+    <label>컨디션 (1~5)
+      <input type="number" name="condition_level" min="1" max="5" required>
+    </label>
+
+    <label>통증 정도 (1~5)
+      <input type="number" name="pain_level" min="1" max="5" required>
+    </label>
+
+    <label>집중력 (1~5)
+      <input type="number" name="focus_level" min="1" max="5" required>
+    </label>
+
+    <label>학습 집중도 (1~5)
+      <input type="number" name="study_level" min="1" max="5" required>
+    </label>
+
+    <label>기타 메모
+      <textarea name="note" rows="3" placeholder="기타 내용이 있다면 적어주세요."></textarea>
+    </label>
+
+    <button type="submit">제출하기</button>
+  </form>
+
+  <script>
+    const BASE_URL = 'https://supermax.kr/college';
+
+    async function loadStudents() {
+      const res = await fetch(`${BASE_URL}/students`);
+      const students = await res.json();
+      const select = document.getElementById('studentSelect');
+      select.innerHTML = '<option value="">-- 선택 --</option>';
+      students.forEach(s => {
+        const option = document.createElement('option');
+        option.value = s.id;
+        option.textContent = `${s.name} (${s.school}, ${s.grade})`;
+        select.appendChild(option);
+      });
+    }
+
+    document.getElementById('mentalForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const payload = Object.fromEntries(formData.entries());
+
+      // 날짜 자동 삽입
+      payload.submitted_at = new Date().toISOString().split('T')[0];
+
+      const res = await fetch(`${BASE_URL}/mental-check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+      alert(result.message || '제출 완료!');
+      e.target.reset();
+    });
+
+    loadStudents();
+  </script>
+</body>
+</html>

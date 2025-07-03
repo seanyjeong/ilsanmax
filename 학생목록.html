@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>전체 학생 목록</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <style>
+    table { width: 100%; }
+    td, th { text-align: center; }
+    input { width: 300px; padding: 8px; margin-bottom: 20px; }
+    .clickable { color: blue; cursor: pointer; text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h2>전체 학생 목록</h2>
+  <input type="text" id="searchInput" placeholder="이름 또는 학교로 검색" />
+
+  <table>
+    <thead>
+      <tr>
+        <th>이름</th>
+        <th>학교</th>
+        <th>학년</th>
+        <th>성별</th>
+        <th>수시/정시</th>
+        <th>현재 강사</th>
+      </tr>
+    </thead>
+    <tbody id="studentList"></tbody>
+  </table>
+
+  <script>
+    const BASE_URL = 'https://supermax.kr/college';
+    let students = [];
+
+    async function loadStudents() {
+      const res = await fetch(`${BASE_URL}/students`);
+      students = await res.json();
+      renderList(students);
+    }
+
+    function renderList(list) {
+      const tbody = document.getElementById('studentList');
+      tbody.innerHTML = '';
+      list.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="clickable" onclick="goToDetail(${s.id})">${s.name}</td>
+          <td>${s.school || '-'}</td>
+          <td>${s.grade || '-'}</td>
+          <td>${s.gender || '-'}</td>
+          <td>${s.lesson_type || '-'}</td>
+          <td>${s.instructor_name || '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function goToDetail(id) {
+      window.location.href = `student-detail.html?id=${id}`;
+    }
+
+    document.getElementById('searchInput').addEventListener('input', e => {
+      const keyword = e.target.value.toLowerCase();
+      const filtered = students.filter(s =>
+        s.name.toLowerCase().includes(keyword) ||
+        (s.school && s.school.toLowerCase().includes(keyword))
+      );
+      renderList(filtered);
+    });
+
+    loadStudents();
+  </script>
+</body>
+</html>

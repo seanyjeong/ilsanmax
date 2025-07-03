@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>학생 상세 정보</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <style>
+    .info-box { border: 1px solid #ccc; padding: 1em; margin-bottom: 1em; }
+    select { margin-bottom: 1em; }
+  </style>
+</head>
+<body>
+  <h2>학생 상세 정보</h2>
+
+  <div class="info-box" id="basicInfo"></div>
+
+  <h3>모의고사 성적</h3>
+  <select id="examMonth">
+    <option value="3">3월</option>
+    <option value="6">6월</option>
+    <option value="9">9월</option>
+  </select>
+  <div class="info-box" id="examInfo">불러오는 중...</div>
+
+  <h3>실기 기록</h3>
+  <div class="info-box" id="recordInfo">불러오는 중...</div>
+
+  <h3>멘탈 자가 체크 이력</h3>
+  <div class="info-box" id="mentalInfo">불러오는 중...</div>
+
+  <script>
+    const BASE_URL = 'https://supermax.kr/college';
+    const urlParams = new URLSearchParams(window.location.search);
+    const studentId = urlParams.get('id');
+
+    async function loadStudentDetail() {
+      const res = await fetch(`${BASE_URL}/student-detail?id=${studentId}`);
+      const data = await res.json();
+
+      document.getElementById('basicInfo').innerHTML = `
+        <strong>이름:</strong> ${data.name}<br>
+        <strong>학교:</strong> ${data.school}<br>
+        <strong>학년:</strong> ${data.grade}<br>
+        <strong>성별:</strong> ${data.gender}<br>
+        <strong>수시/정시:</strong> ${data.lesson_type}<br>
+        <strong>담당 강사:</strong> ${data.instructor_name || '-'}
+      `;
+    }
+
+    async function loadExam(month) {
+      const res = await fetch(`${BASE_URL}/student-exam?student_id=${studentId}&month=${month}`);
+      const scores = await res.json();
+      document.getElementById('examInfo').innerHTML = `
+        <strong>국어:</strong> ${scores.korean.subject} / 백분위 ${scores.korean.percentile}, 표준점수 ${scores.korean.standard}, 등급 ${scores.korean.grade}<br>
+        <strong>수학:</strong> ${scores.math.subject} / 백분위 ${scores.math.percentile}, 표준점수 ${scores.math.standard}, 등급 ${scores.math.grade}<br>
+        <strong>영어:</strong> 등급 ${scores.english}<br>
+        <strong>탐구1:</strong> ${scores.exploration1.subject} / 백분위 ${scores.exploration1.percentile}<br>
+        <strong>탐구2:</strong> ${scores.exploration2.subject} / 백분위 ${scores.exploration2.percentile}<br>
+        <strong>한국사:</strong> 등급 ${scores.korean_history}
+      `;
+    }
+
+    async function loadRecord() {
+      const res = await fetch(`${BASE_URL}/student-records?id=${studentId}`);
+      const records = await res.json();
+      const lines = records.map(r => `<div>${r.event}: ${r.record} (${r.date})</div>`);
+      document.getElementById('recordInfo').innerHTML = lines.join('');
+    }
+
+    async function loadMental() {
+      const res = await fetch(`${BASE_URL}/student-mental?id=${studentId}`);
+      const data = await res.json();
+      const lines = data.map(m => `<div>${m.date}: ${m.score_summary}</div>`);
+      document.getElementById('mentalInfo').innerHTML = lines.join('');
+    }
+
+    document.getElementById('examMonth').addEventListener('change', e => {
+      loadExam(e.target.value);
+    });
+
+    loadStudentDetail();
+    loadExam(3);
+    loadRecord();
+    loadMental();
+  </script>
+</body>
+</html>

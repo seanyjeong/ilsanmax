@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>모의고사 성적 입력</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <style>
+    body { max-width: 600px; margin: auto; font-size: 16px; }
+    select, input { font-size: 1em; }
+  </style>
+</head>
+<body>
+  <h2>📝 모의고사 성적 입력</h2>
+  <form id="examForm">
+    <label>학생 선택
+      <select name="student_id" id="studentSelect" required></select>
+    </label>
+
+    <label>응시 월
+      <select name="exam_month" required>
+        <option value="">-- 선택 --</option>
+        <option value="3월">3월</option>
+        <option value="6월">6월</option>
+        <option value="9월">9월</option>
+      </select>
+    </label>
+
+    <label>국어 과목
+      <select name="korean_subject" required>
+        <option value="">-- 선택 --</option>
+        <option value="언어와매체">언어와매체</option>
+        <option value="화법과작문">화법과작문</option>
+      </select>
+    </label>
+    <label>국어 백분위 <input type="number" step="0.1" name="korean_percentile"></label>
+    <label>국어 표준점수 <input type="number" step="0.1" name="korean_standard_score"></label>
+    <label>국어 등급 <input type="number" name="korean_grade" min="1" max="9"></label>
+
+    <label>수학 과목
+      <select name="math_subject" required>
+        <option value="">-- 선택 --</option>
+        <option value="확률과통계">확률과통계</option>
+        <option value="미적분">미적분</option>
+        <option value="기하">기하</option>
+      </select>
+    </label>
+    <label>수학 백분위 <input type="number" step="0.1" name="math_percentile"></label>
+    <label>수학 표준점수 <input type="number" step="0.1" name="math_standard_score"></label>
+    <label>수학 등급 <input type="number" name="math_grade" min="1" max="9"></label>
+
+    <label>영어 등급 <input type="number" name="english_grade" min="1" max="9"></label>
+    <label>한국사 등급 <input type="number" name="history_grade" min="1" max="9"></label>
+
+    <label>탐구1 과목
+      <select name="inquiry1_subject" id="inquiry1">
+        <option value="">-- 선택 --</option>
+      </select>
+    </label>
+    <label>탐구1 백분위 <input type="number" step="0.1" name="inquiry1_percentile"></label>
+    <label>탐구1 표준점수 <input type="number" step="0.1" name="inquiry1_standard_score"></label>
+    <label>탐구1 등급 <input type="number" name="inquiry1_grade" min="1" max="9"></label>
+
+    <label>탐구2 과목
+      <select name="inquiry2_subject" id="inquiry2">
+        <option value="">-- 선택 --</option>
+      </select>
+    </label>
+    <label>탐구2 백분위 <input type="number" step="0.1" name="inquiry2_percentile"></label>
+    <label>탐구2 표준점수 <input type="number" step="0.1" name="inquiry2_standard_score"></label>
+    <label>탐구2 등급 <input type="number" name="inquiry2_grade" min="1" max="9"></label>
+
+    <button type="submit">저장</button>
+  </form>
+
+  <script>
+    const BASE_URL = 'https://supermax.kr/college';
+    const subjects = [
+      "생활과윤리", "윤리와사상", "한국지리", "세계지리", "동아시아사", "세계사",
+      "정치와법", "경제", "사회문화",
+      "물리학I", "화학I", "생명과학I", "지구과학I",
+      "물리학II", "화학II", "생명과학II", "지구과학II"
+    ];
+
+    function fillInquirySubjects() {
+      const inquiry1 = document.getElementById('inquiry1');
+      const inquiry2 = document.getElementById('inquiry2');
+      subjects.forEach(subj => {
+        inquiry1.innerHTML += `<option value="${subj}">${subj}</option>`;
+        inquiry2.innerHTML += `<option value="${subj}">${subj}</option>`;
+      });
+    }
+
+    async function loadStudents() {
+      const res = await fetch(`${BASE_URL}/students`);
+      const students = await res.json();
+      const select = document.getElementById('studentSelect');
+      students.forEach(s => {
+        const option = document.createElement('option');
+        option.value = s.id;
+        option.textContent = `${s.name} (${s.school}, ${s.grade})`;
+        select.appendChild(option);
+      });
+    }
+
+    function sanitizePayload(data) {
+      const sanitized = {};
+      for (const key in data) {
+        sanitized[key] = data[key] === '' ? null : data[key];
+      }
+      return sanitized;
+    }
+
+    document.getElementById('examForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      let payload = Object.fromEntries(formData.entries());
+
+      // 유효성 검사
+      if (payload.inquiry1_subject && payload.inquiry1_subject === payload.inquiry2_subject) {
+        alert('🚫 탐구1과 탐구2 과목이 동일합니다. 다른 과목을 선택해주세요.');
+        return;
+      }
+
+      payload = sanitizePayload(payload);
+
+      console.log("📤 전송 데이터:", payload);
+
+      const res = await fetch(`${BASE_URL}/submit-mock-exam`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+      alert(result.message || '성적이 저장되었습니다.');
+      e.target.reset();
+    });
+
+    fillInquirySubjects();
+    loadStudents();
+  </script>
+</body>
+</html>

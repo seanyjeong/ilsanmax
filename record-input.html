@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>실기 기록 입력</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <style>
+    body { font-size: 16px; max-width: 500px; margin: auto; }
+    label { margin-top: 1em; }
+    input[type="number"] { width: 100%; font-size: 1.2em; }
+    button { font-size: 1.2em; }
+  </style>
+</head>
+<body>
+  <h2>🏃 실기 기록 입력</h2>
+
+  <form id="recordForm">
+    <label>학생 선택
+      <select id="studentSelect" name="student_id" required></select>
+    </label>
+
+    <label>제자리멀리뛰기(cm)
+      <input type="number" name="standing_long_jump" step="1" />
+    </label>
+
+    <label>메디신볼던지기(m)
+      <input type="number" name="medicine_ball_throw" step="0.1" />
+    </label>
+
+    <label>배근력(kg)
+      <input type="number" name="back_strength" step="0.1" />
+    </label>
+
+    <label>10m 왕복(버튼)(초)
+      <input type="number" name="shuttle_10m_button" step="0.01" />
+    </label>
+
+    <label>10m 왕복(콘)(초)
+      <input type="number" name="shuttle_10m_cone" step="0.01" />
+    </label>
+
+    <label>20m 왕복(버튼)(초)
+      <input type="number" name="shuttle_20m_button" step="0.01" />
+    </label>
+
+    <label>20m 왕복(콘)(초)
+      <input type="number" name="shuttle_20m_cone" step="0.01" />
+    </label>
+
+    <label>좌전굴(cm)
+      <input type="number" name="sit_and_reach" step="0.1" />
+    </label>
+
+    <button type="submit">기록 저장</button>
+  </form>
+
+  <script>
+    const BASE_URL = 'https://supermax.kr/college';
+
+    async function loadStudents() {
+      const res = await fetch(`${BASE_URL}/students`);
+      const students = await res.json();
+      const select = document.getElementById('studentSelect');
+      select.innerHTML = '<option value="">-- 선택 --</option>';
+      students.forEach(s => {
+        const option = document.createElement('option');
+        option.value = s.id;
+        option.textContent = `${s.name} (${s.school}, ${s.grade})`;
+        select.appendChild(option);
+      });
+    }
+
+    document.getElementById('recordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+
+      const fieldMap = {
+        standing_long_jump: "jump_cm",
+        medicine_ball_throw: "medicine_m",
+        back_strength: "back_power_kg",
+        shuttle_10m_button: "run10_btn_sec",
+        shuttle_10m_cone: "run10_cone_sec",
+        shuttle_20m_button: "run20_btn_sec",
+        shuttle_20m_cone: "run20_cone_sec",
+        sit_and_reach: "flexibility_cm"
+      };
+
+      const payload = {};
+      formData.forEach((value, key) => {
+        const mappedKey = fieldMap[key] || key;
+        if (value === "") {
+          payload[mappedKey] = null;
+        } else if (!isNaN(value)) {
+          payload[mappedKey] = parseFloat(value);
+        } else {
+          payload[mappedKey] = value;
+        }
+      });
+
+      payload.record_date = new Date().toISOString().split('T')[0];
+
+      console.log("📤 전송할 데이터:", payload);
+
+      const res = await fetch(`${BASE_URL}/submit-record`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+      alert(result.message || '기록 저장 완료!');
+      e.target.reset();
+    });
+
+    loadStudents();
+  </script>
+</body>
+</html>
