@@ -301,6 +301,10 @@
       </div>
       
       <div class="success-details" id="successDetails">
+
+        <!-- 아래 success-details 바로 밑에 추가해줘 -->
+
+
         <!-- 제출한 내용이 동적으로 채워집니다 -->
       </div>
     </div>
@@ -411,53 +415,103 @@ if (res.ok) {
 }
 
 
-    function showSuccessScreen(formData) {
-      document.getElementById('formContainer').style.display = 'none';
-      
-      const detailsContainer = document.getElementById('successDetails');
-      detailsContainer.innerHTML = `
-        <div class="detail-item">
-          <span class="detail-label">학생 이름</span>
-          <span>${formData.student_name}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">수면 시간</span>
-          <span>${formData.sleep_hours || '0'}시간</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">스트레스 정도</span>
-          <span>${formData.stress_level}/5</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">훈련 의욕</span>
-          <span>${formData.motivation_level}/5</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">컨디션</span>
-          <span>${formData.condition_level}/5</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">부상 통증</span>
-          <span>${formData.pain_level}/5</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">운동 집중력</span>
-          <span>${formData.focus_level}/5</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">학습 집중도</span>
-          <span>${formData.study_level}/5</span>
-        </div>
-        ${formData.note ? `
-        <div class="detail-item" style="flex-direction: column; align-items: flex-start;">
-          <span class="detail-label">기타 메모</span>
-          <span>${formData.note}</span>
-        </div>
-        ` : ''}
-      `;
-      
-      document.getElementById('successContainer').style.display = 'block';
-    }
+function showSuccessScreen(formData) {
+  document.getElementById('formContainer').style.display = 'none';
+
+  const detailsContainer = document.getElementById('successDetails');
+
+  // 1. 기본 제출 정보 세팅
+  detailsContainer.innerHTML = `
+    <div class="detail-item">
+      <span class="detail-label">학생 이름</span>
+      <span>${formData.student_name}</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">수면 시간</span>
+      <span>${formData.sleep_hours || '0'}시간</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">스트레스 정도</span>
+      <span>${formData.stress_level}/5</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">훈련 의욕</span>
+      <span>${formData.motivation_level}/5</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">컨디션</span>
+      <span>${formData.condition_level}/5</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">부상 통증</span>
+      <span>${formData.pain_level}/5</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">운동 집중력</span>
+      <span>${formData.focus_level}/5</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">학습 집중도</span>
+      <span>${formData.study_level}/5</span>
+    </div>
+    ${formData.note ? `
+    <div class="detail-item" style="flex-direction: column; align-items: flex-start;">
+      <span class="detail-label">기타 메모</span>
+      <span>${formData.note}</span>
+    </div>
+    ` : ''}
+  `;
+
+  // 2. aiAdviceBox DOM 동적 생성 (null 방지)
+  const aiBox = document.createElement('div');
+  aiBox.id = 'aiAdviceBox';
+  aiBox.className = 'ai-analysis';
+  aiBox.style.cssText = 'background:#eef5ff; border-left: 4px solid #4895ef; padding: 12px; border-radius: 8px; margin-top: 10px;';
+  aiBox.innerHTML = 'AI 분석 중입니다...';
+  detailsContainer.appendChild(aiBox);
+
+  // 3. GPT 분석 호출
+  loadAiAdvice(formData);
+
+  document.getElementById('successContainer').style.display = 'block';
+}
+
+async function loadAiAdvice(data) {
+  try {
+    const res = await fetch(`${BASE_URL}/analyze-mental`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    // 총점 계산 로직
+    const score =
+      (parseFloat(data.sleep_hours) || 0) +
+      (parseFloat(data.motivation_level) || 0) +
+      (parseFloat(data.condition_level) || 0) +
+      (parseFloat(data.focus_level) || 0) +
+      (parseFloat(data.study_level) || 0) -
+      (parseFloat(data.stress_level) || 0) -
+      (parseFloat(data.pain_level) || 0);
+
+    const roundedScore = Math.round(score * 10) / 10;
+
+    const adviceBox = document.getElementById('aiAdviceBox');
+    adviceBox.innerHTML = `
+      <strong>총점:</strong> ${roundedScore}점<br><br>
+      <strong>원장님AI 분석 결과:</strong><br>
+      ${result.comment}
+    `;
+  } catch (error) {
+    const adviceBox = document.getElementById('aiAdviceBox');
+    adviceBox.innerHTML = `<span style="color:red;">AI 분석에 실패했습니다. 다시 시도해주세요.</span>`;
+    console.error('GPT 분석 오류:', error);
+  }
+}
+
+
 
     document.addEventListener('DOMContentLoaded', loadStudents);
   </script>
