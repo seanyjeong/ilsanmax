@@ -408,7 +408,11 @@
         if (validRecords.length === 0) continue;
 
         const safeId = event.replace(/[^\w\-]/g, '_') + '_' + chartIndex++;
-        const labels = validRecords.map(r => r.date.slice(0, 10));
+   const labels = validRecords.map(r => {
+  const localDate = new Date(new Date(r.date).getTime() + 9 * 60 * 60 * 1000);
+  return localDate.toISOString().slice(0, 10);
+});
+
         const values = validRecords.map(r => r.record);
 
         const block = document.createElement('div');
@@ -515,69 +519,92 @@
       }
     }
 
-    async function loadMentalChecks() {
-      const res = await fetch(`${BASE_URL}/mental-check/${studentId}`);
-      const data = await res.json();
-      const container = document.getElementById('mentalChecks');
-      
-      if (!Array.isArray(data) || data.length === 0) {
-        container.innerHTML = '<div class="loading">데이터 없음</div>';
-        return;
-      }
+async function loadMentalChecks() {
+  const res = await fetch(`${BASE_URL}/mental-check/${studentId}`);
+  const data = await res.json();
+  const container = document.getElementById('mentalChecks');
+  
+  if (!Array.isArray(data) || data.length === 0) {
+    container.innerHTML = '<div class="loading">데이터 없음</div>';
+    return;
+  }
 
-      container.innerHTML = '';
-      
-      data.forEach(entry => {
-        const {
-          submitted_at, sleep_hours, stress_level, motivation_level,
-          condition_level, pain_level, focus_level, study_level, note
-        } = entry;
+  // ⭐ 최신순 정렬 확정
+  data.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
 
-        const score =
-          (sleep_hours || 0) +
-          (motivation_level || 0) +
-          (condition_level || 0) +
-          (focus_level || 0) +
-          (study_level || 0) -
-          (stress_level || 0) -
-          (pain_level || 0);
+  container.innerHTML = '';
 
-        let statusClass = '';
-        let statusText = '';
-        
-        if (score >= 13) {
-          statusClass = 'status-normal';
-          statusText = '정상';
-        } else if (score >= 10) {
-          statusClass = 'status-warning';
-          statusText = '관심 필요';
-        } else if (score >= 6) {
-          statusClass = 'status-danger';
-          statusText = '관리 필요';
-        } else {
-          statusClass = 'status-critical';
-          statusText = '심각';
-        }
+  // 접기/펼치기 버튼
+  if (data.length > 1) {
+    const toggleBtn = document.createElement('button');
+    toggleBtn.textContent = '나머지 기록 펼치기';
+    toggleBtn.style.marginBottom = '10px';
+    toggleBtn.style.padding = '8px 12px';
+    toggleBtn.style.border = 'none';
+    toggleBtn.style.borderRadius = '6px';
+    toggleBtn.style.backgroundColor = '#ddd';
+    toggleBtn.style.cursor = 'pointer';
 
-        const entryElement = document.createElement('div');
-        entryElement.className = 'mental-check';
-        entryElement.innerHTML = `
-          <div><strong>${submitted_at}</strong> <span class="mental-status ${statusClass}">${statusText} (${score}점)</span></div>
-          <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
-            <div><small>수면:</small> ${sleep_hours}시간</div>
-            <div><small>스트레스:</small> ${stress_level}/5</div>
-            <div><small>의욕:</small> ${motivation_level}/5</div>
-            <div><small>컨디션:</small> ${condition_level}/5</div>
-            <div><small>통증:</small> ${pain_level}/5</div>
-            <div><small>집중:</small> ${focus_level}/5</div>
-            <div><small>학습:</small> ${study_level}/5</div>
-          </div>
-          ${note ? `<div style="margin-top: 10px;"><small>메모:</small> ${note}</div>` : ''}
-        `;
-        
-        container.appendChild(entryElement);
+    let isExpanded = false;
+
+    toggleBtn.addEventListener('click', () => {
+      isExpanded = !isExpanded;
+      data.slice(1).forEach((_, idx) => {
+        const el = document.getElementById(`mental-${idx + 1}`);
+        if (el) el.style.display = isExpanded ? 'block' : 'none';
       });
-    }
+      toggleBtn.textContent = isExpanded ? '기록 숨기기' : '나머지 기록 펼치기';
+    });
+
+    container.appendChild(toggleBtn);
+  }
+
+  data.forEach((entry, idx) => {
+    const {
+      submitted_at, sleep_hours, stress_level, motivation_level,
+      condition_level, pain_level, focus_level, study_level, note
+    } = entry;
+
+const dateStr = new Date(entry.created_at).toLocaleDateString('ko-KR');
+
+    const score =
+      (sleep_hours || 0) +
+      (motivation_level || 0) +
+      (condition_level || 0) +
+      (focus_level || 0) +
+      (study_level || 0) -
+      (stress_level || 0) -
+      (pain_level || 0);
+
+    let statusClass = '', statusText = '';
+    if (score >= 13) { statusClass = 'status-normal'; statusText = '정상'; }
+    else if (score >= 10) { statusClass = 'status-warning'; statusText = '관심 필요'; }
+    else if (score >= 6) { statusClass = 'status-danger'; statusText = '관리 필요'; }
+    else { statusClass = 'status-critical'; statusText = '심각'; }
+
+    const entryElement = document.createElement('div');
+    entryElement.className = 'mental-check';
+    entryElement.id = `mental-${idx}`;
+    entryElement.style.display = (idx === 0 ? 'block' : 'none');
+    entryElement.innerHTML = `
+      <div><strong>${dateStr}</strong> <span class="mental-status ${statusClass}">${statusText} (${score}점)</span></div>
+      <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+        <div><small>수면:</small> ${sleep_hours}시간</div>
+        <div><small>스트레스:</small> ${stress_level}/5</div>
+        <div><small>대학진학의욕:</small> ${motivation_level}/5</div>
+        <div><small>컨디션:</small> ${condition_level}/5</div>
+        <div><small>부상통증:</small> ${pain_level}/5</div>
+        <div><small>운동집중도:</small> ${focus_level}/5</div>
+        <div><small>학습집중도:</small> ${study_level}/5</div>
+      </div>
+      ${note ? `<div style="margin-top: 10px;"><small>메모:</small> ${note}</div>` : ''}
+    `;
+
+    container.appendChild(entryElement);
+  });
+}
+
+
 
     // 페이지 로드 시 데이터 불러오기
     document.addEventListener('DOMContentLoaded', () => {
