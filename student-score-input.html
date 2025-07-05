@@ -6,72 +6,249 @@
   <title>모의고사 성적 입력</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
   <style>
-    body { max-width: 600px; margin: auto; font-size: 16px; }
-    select, input { font-size: 1em; }
+    :root {
+      --primary-color: #4364f7;
+      --success-color: #4CAF50;
+      --border-color: #e0e0e0;
+    }
+    
+    body { 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    h2 {
+      color: var(--primary-color);
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    
+    .form-container {
+      display: grid;
+      gap: 20px;
+    }
+    
+    .form-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .subject-group {
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    .subject-group h3 {
+      margin-top: 0;
+      color: var(--primary-color);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    
+    select, input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    
+    button[type="submit"] {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+    
+    .success-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      text-align: center;
+      z-index: 1000;
+      display: none;
+    }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .form-group, .input-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
-  <h2>📝 모의고사 성적 입력</h2>
-  <form id="examForm">
-    <label>학생 선택
-      <select name="student_id" id="studentSelect" required></select>
-    </label>
+  <h2>모의고사 성적 입력</h2>
+  <form id="examForm" class="form-container">
+    <div class="form-group">
+      <div>
+        <label>학생 선택
+          <select name="student_id" id="studentSelect" required></select>
+        </label>
+      </div>
+      <div>
+        <label>응시 월
+          <select name="exam_month" required>
+            <option value="">-- 선택 --</option>
+            <option value="3월">3월</option>
+            <option value="6월">6월</option>
+            <option value="9월">9월</option>
+          </select>
+        </label>
+      </div>
+    </div>
 
-    <label>응시 월
-      <select name="exam_month" required>
-        <option value="">-- 선택 --</option>
-        <option value="3월">3월</option>
-        <option value="6월">6월</option>
-        <option value="9월">9월</option>
-      </select>
-    </label>
+    <div class="subject-group">
+      <h3>국어</h3>
+      <div class="input-grid">
+        <div>
+          <label>과목
+            <select name="korean_subject" id="koreanSubject" required>
+              <option value="">-- 선택 --</option>
+              <option value="언어와매체">언어와매체</option>
+              <option value="화법과작문">화법과작문</option>
+              <option value="미응시">미응시</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>표준점수 <input type="number" step="0.1" name="korean_standard_score" class="korean-input"></label>
+        </div>
+        <div>
+          <label>백분위 <input type="number" step="0.1" name="korean_percentile" class="korean-input"></label>
+        </div>
+        <div>
+          <label>등급 <input type="number" name="korean_grade" min="1" max="9" class="korean-input"></label>
+        </div>
+      </div>
+    </div>
 
-    <label>국어 과목
-      <select name="korean_subject" required>
-        <option value="">-- 선택 --</option>
-        <option value="언어와매체">언어와매체</option>
-        <option value="화법과작문">화법과작문</option>
-      </select>
-    </label>
-    <label>국어 백분위 <input type="number" step="0.1" name="korean_percentile"></label>
-    <label>국어 표준점수 <input type="number" step="0.1" name="korean_standard_score"></label>
-    <label>국어 등급 <input type="number" name="korean_grade" min="1" max="9"></label>
+    <div class="subject-group">
+      <h3>수학</h3>
+      <div class="input-grid">
+        <div>
+          <label>과목
+            <select name="math_subject" id="mathSubject" required>
+              <option value="">-- 선택 --</option>
+              <option value="확률과통계">확률과통계</option>
+              <option value="미적분">미적분</option>
+              <option value="기하">기하</option>
+              <option value="미응시">미응시</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>표준점수 <input type="number" step="0.1" name="math_standard_score" class="math-input"></label>
+        </div>
+        <div>
+          <label>백분위 <input type="number" step="0.1" name="math_percentile" class="math-input"></label>
+        </div>
+        <div>
+          <label>등급 <input type="number" name="math_grade" min="1" max="9" class="math-input"></label>
+        </div>
+      </div>
+    </div>
 
-    <label>수학 과목
-      <select name="math_subject" required>
-        <option value="">-- 선택 --</option>
-        <option value="확률과통계">확률과통계</option>
-        <option value="미적분">미적분</option>
-        <option value="기하">기하</option>
-      </select>
-    </label>
-    <label>수학 백분위 <input type="number" step="0.1" name="math_percentile"></label>
-    <label>수학 표준점수 <input type="number" step="0.1" name="math_standard_score"></label>
-    <label>수학 등급 <input type="number" name="math_grade" min="1" max="9"></label>
+    <div class="subject-group">
+      <h3>영어/한국사</h3>
+      <div class="input-grid">
+        <div>
+          <label>영어 등급 <input type="number" name="english_grade" min="1" max="9"></label>
+        </div>
+        <div>
+          <label>한국사 등급 <input type="number" name="history_grade" min="1" max="9"></label>
+        </div>
+      </div>
+    </div>
 
-    <label>영어 등급 <input type="number" name="english_grade" min="1" max="9"></label>
-    <label>한국사 등급 <input type="number" name="history_grade" min="1" max="9"></label>
+    <div class="subject-group">
+      <h3>탐구 1</h3>
+      <div class="input-grid">
+        <div>
+          <label>과목
+            <select name="inquiry1_subject" id="inquiry1">
+              <option value="">-- 선택 --</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>표준점수 <input type="number" step="0.1" name="inquiry1_standard_score" class="inquiry1-input"></label>
+        </div>
+        <div>
+          <label>백분위 <input type="number" step="0.1" name="inquiry1_percentile" class="inquiry1-input"></label>
+        </div>
+        <div>
+          <label>등급 <input type="number" name="inquiry1_grade" min="1" max="9" class="inquiry1-input"></label>
+        </div>
+      </div>
+    </div>
 
-    <label>탐구1 과목
-      <select name="inquiry1_subject" id="inquiry1">
-        <option value="">-- 선택 --</option>
-      </select>
-    </label>
-    <label>탐구1 백분위 <input type="number" step="0.1" name="inquiry1_percentile"></label>
-    <label>탐구1 표준점수 <input type="number" step="0.1" name="inquiry1_standard_score"></label>
-    <label>탐구1 등급 <input type="number" name="inquiry1_grade" min="1" max="9"></label>
+    <div class="subject-group">
+      <h3>탐구 2</h3>
+      <div class="input-grid">
+        <div>
+          <label>과목
+            <select name="inquiry2_subject" id="inquiry2">
+              <option value="">-- 선택 --</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>표준점수 <input type="number" step="0.1" name="inquiry2_standard_score" class="inquiry2-input"></label>
+        </div>
+        <div>
+          <label>백분위 <input type="number" step="0.1" name="inquiry2_percentile" class="inquiry2-input"></label>
+        </div>
+        <div>
+          <label>등급 <input type="number" name="inquiry2_grade" min="1" max="9" class="inquiry2-input"></label>
+        </div>
+      </div>
+    </div>
 
-    <label>탐구2 과목
-      <select name="inquiry2_subject" id="inquiry2">
-        <option value="">-- 선택 --</option>
-      </select>
-    </label>
-    <label>탐구2 백분위 <input type="number" step="0.1" name="inquiry2_percentile"></label>
-    <label>탐구2 표준점수 <input type="number" step="0.1" name="inquiry2_standard_score"></label>
-    <label>탐구2 등급 <input type="number" name="inquiry2_grade" min="1" max="9"></label>
-
-    <button type="submit">저장</button>
+    <button type="submit">성적 저장하기</button>
   </form>
+
+  <div class="overlay" id="overlay"></div>
+  <div class="success-message" id="successMessage">
+    <h3>성적 입력 완료!</h3>
+    <p>학생의 모의고사 성적이 정상적으로 저장되었습니다.</p>
+    <button id="confirmButton">확인</button>
+  </div>
 
   <script>
     const BASE_URL = 'https://supermax.kr/college';
@@ -79,66 +256,110 @@
       "생활과윤리", "윤리와사상", "한국지리", "세계지리", "동아시아사", "세계사",
       "정치와법", "경제", "사회문화",
       "물리학I", "화학I", "생명과학I", "지구과학I",
-      "물리학II", "화학II", "생명과학II", "지구과학II"
+      "물리학II", "화학II", "생명과학II", "지구과학II", "미응시"
     ];
 
+    // 초기화 함수
+    function init() {
+      fillInquirySubjects();
+      loadStudents();
+      setupEventHandlers();
+    }
+
+    // 탐구 과목 드롭다운 채우기
     function fillInquirySubjects() {
       const inquiry1 = document.getElementById('inquiry1');
       const inquiry2 = document.getElementById('inquiry2');
+      
       subjects.forEach(subj => {
         inquiry1.innerHTML += `<option value="${subj}">${subj}</option>`;
         inquiry2.innerHTML += `<option value="${subj}">${subj}</option>`;
       });
     }
 
+    // 학생 목록 불러오기
     async function loadStudents() {
-      const res = await fetch(`${BASE_URL}/students`);
-      const students = await res.json();
-      const select = document.getElementById('studentSelect');
-      students.forEach(s => {
-        const option = document.createElement('option');
-        option.value = s.id;
-        option.textContent = `${s.name} (${s.school}, ${s.grade})`;
-        select.appendChild(option);
+      try {
+        const res = await fetch(`${BASE_URL}/students`);
+        const students = await res.json();
+        const select = document.getElementById('studentSelect');
+        
+        students.forEach(s => {
+          const option = document.createElement('option');
+          option.value = s.id;
+          option.textContent = `${s.name} (${s.school}, ${s.grade}학년)`;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('학생 목록 불러오기 실패:', error);
+      }
+    }
+
+    // 이벤트 핸들러 설정
+    function setupEventHandlers() {
+      // 미응시 선택 시 입력 필드 비활성화
+      document.querySelectorAll('[id$="Subject"], #inquiry1, #inquiry2').forEach(select => {
+        const prefix = select.id.replace('Subject', '').replace('inquiry', 'inquiry-');
+        const inputs = document.querySelectorAll(`.${prefix}-input`);
+        
+        select.addEventListener('change', function() {
+          const isNonAttended = this.value === '미응시';
+          inputs.forEach(input => {
+            input.disabled = isNonAttended;
+            if(isNonAttended) input.value = '';
+          });
+        });
+      });
+
+      // 폼 제출 처리
+      document.getElementById('examForm').addEventListener('submit', handleSubmit);
+      
+      // 확인 버튼 클릭 이벤트
+      document.getElementById('confirmButton').addEventListener('click', function() {
+        document.getElementById('successMessage').style.display = 'none';
+        document.getElementById('overlay').style.display = 'none';
       });
     }
 
-    function sanitizePayload(data) {
-      const sanitized = {};
-      for (const key in data) {
-        sanitized[key] = data[key] === '' ? null : data[key];
-      }
-      return sanitized;
-    }
-
-    document.getElementById('examForm').addEventListener('submit', async (e) => {
+    // 폼 제출 처리
+    async function handleSubmit(e) {
       e.preventDefault();
       const formData = new FormData(e.target);
       let payload = Object.fromEntries(formData.entries());
 
       // 유효성 검사
-      if (payload.inquiry1_subject && payload.inquiry1_subject === payload.inquiry2_subject) {
-        alert('🚫 탐구1과 탐구2 과목이 동일합니다. 다른 과목을 선택해주세요.');
+      if (payload.inquiry1_subject === payload.inquiry2_subject && 
+          payload.inquiry1_subject !== '미응시') {
+        alert('탐구1과 탐구2 과목이 동일합니다. 다른 과목을 선택해주세요.');
         return;
       }
 
-      payload = sanitizePayload(payload);
+      try {
+        document.getElementById('overlay').style.display = 'block';
+        
+        const res = await fetch(`${BASE_URL}/submit-mock-exam`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
 
-      console.log("📤 전송 데이터:", payload);
+        const result = await res.json();
+        
+        // 성공 메시지 표시
+        document.getElementById('successMessage').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+        
+        // 폼 초기화
+        e.target.reset();
+      } catch (error) {
+        console.error('저장 실패:', error);
+        alert('저장 중 오류가 발생했습니다.');
+        document.getElementById('overlay').style.display = 'none';
+      }
+    }
 
-      const res = await fetch(`${BASE_URL}/submit-mock-exam`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const result = await res.json();
-      alert(result.message || '성적이 저장되었습니다.');
-      e.target.reset();
-    });
-
-    fillInquirySubjects();
-    loadStudents();
+    // 페이지 로드 시 초기화
+    document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
