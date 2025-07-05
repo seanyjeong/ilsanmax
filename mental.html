@@ -349,61 +349,70 @@
         student.name.trim() === studentName
       );
 
-      if (foundStudent) {
-        document.getElementById('studentId').value = foundStudent.id;
-        showAlert(`${foundStudent.name} 학생 확인되었습니다.`, 'success');
-      } else {
-        document.getElementById('studentId').value = '';
-        showAlert(`
-          등록된 학생을 찾을 수 없습니다.<br>
-          1. 이름을 정확히 입력했는지 확인해주세요<br>
-          2. 그래도 안되면 원장님께 문의해주세요
-        `, 'warning');
-      }
-    });
-
-    document.getElementById('mentalForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 제출 중...';
-
-      const formData = new FormData(e.target);
-      const payload = Object.fromEntries(formData.entries());
-
-      if (!payload.student_id) {
-        showAlert('학생 확인을 먼저 해주세요.');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '제출하기';
-        return;
-      }
-
-      payload.submitted_at = new Date().toISOString().split('T')[0];
-
-      try {
-        const res = await fetch(`${BASE_URL}/mental-check`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        const result = await res.json();
-        
-if (res.ok) {
-  showSuccessScreen(payload);
+if (foundStudent) {
+  document.getElementById('studentId').value = foundStudent.id;
+  localStorage.setItem('student_name', foundStudent.name); // 👉 이거 추가!
+  showAlert(`${foundStudent.name} 학생 확인되었습니다.`, 'success');
 } else {
-  showSubmitAlert(result.message || '제출에 실패했습니다.');
-  submitBtn.disabled = false;
-  submitBtn.innerHTML = '제출하기';
+  document.getElementById('studentId').value = '';
+  localStorage.removeItem('student_name'); // 👉 이거도 추가!
+  showAlert(`
+    등록된 학생을 찾을 수 없습니다.<br>
+    1. 이름을 정확히 입력했는지 확인해주세요<br>
+    2. 그래도 안되면 원장님께 문의해주세요
+  `, 'warning');
 }
 
-      } catch (error) {
-        showAlert('네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.', 'warning');
-        console.error('제출 오류:', error);
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '제출하기';
-      }
     });
+
+document.getElementById('mentalForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 제출 중...';
+
+  const formData = new FormData(e.target);
+  const studentName = localStorage.getItem('student_name');
+
+  const payload = {
+    ...Object.fromEntries(formData.entries()),
+    student_name: studentName   // ✅ 이 줄이 핵심!
+  };
+
+  if (!payload.student_id) {
+    showAlert('학생 확인을 먼저 해주세요.');
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '제출하기';
+    return;
+  }
+
+  payload.submitted_at = new Date().toISOString().split('T')[0];
+
+  try {
+    const res = await fetch(`${BASE_URL}/mental-check`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      showSuccessScreen(payload);
+    } else {
+      showSubmitAlert(result.message || '제출에 실패했습니다.');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '제출하기';
+    }
+
+  } catch (error) {
+    showAlert('네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.', 'warning');
+    console.error('제출 오류:', error);
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '제출하기';
+  }
+});
+
 
     function showSubmitAlert(message) {
   const box = document.getElementById('submitAlert');
@@ -435,7 +444,7 @@ function showSuccessScreen(formData) {
       <span>${formData.stress_level}/5</span>
     </div>
     <div class="detail-item">
-      <span class="detail-label">훈련 의욕</span>
+      <span class="detail-label">대학진학의욕</span>
       <span>${formData.motivation_level}/5</span>
     </div>
     <div class="detail-item">
