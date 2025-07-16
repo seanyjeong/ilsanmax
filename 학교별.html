@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>학교별 학생 현황</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4a6bff;
+      --secondary: #3a56d4;
+      --light: #f8f9fa;
+      --dark: #2d3748;
+      --gray: #6c757d;
+      --light-gray: #e2e8f0;
+      --border-radius: 10px;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+    }
+    
+    body {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f5f7ff;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+    
+    h1 {
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 2rem;
+      font-weight: 700;
+      font-size: 2.2rem;
+      letter-spacing: -0.5px;
+    }
+    
+    .header-icon {
+      margin-right: 10px;
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      color: var(--secondary);
+      margin: 2rem 0 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--light-gray);
+      font-weight: 600;
+    }
+    
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 3rem;
+    }
+    
+    .card {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      overflow: hidden;
+      transition: var(--transition);
+      border: 1px solid var(--light-gray);
+    }
+    
+    .card:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+    
+    .card-header {
+      background-color: white;
+      color: var(--dark);
+      padding: 1.2rem;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .card-header:hover {
+      background-color: #f8f9ff;
+    }
+    
+    .card-count {
+      background-color: var(--primary);
+      color: white;
+      padding: 0.3rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
+    .card-body {
+      padding: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+    
+    .card.active .card-body {
+      max-height: 1000px;
+      padding: 1rem;
+    }
+    
+    .student-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .student-item {
+      padding: 0.7rem 0;
+      border-bottom: 1px solid var(--light-gray);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .student-item:last-child {
+      border-bottom: none;
+    }
+    
+    .student-info {
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+    }
+    
+    .student-name {
+      margin-right: 8px;
+    }
+    
+    .student-gender {
+      font-size: 0.85rem;
+      color: var(--gray);
+    }
+    
+    .student-grade {
+      color: var(--primary);
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: #f0f4ff;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      font-size: 1.2rem;
+      color: var(--gray);
+    }
+    
+    .error {
+      text-align: center;
+      padding: 2rem;
+      font-size: 1.2rem;
+      color: #dc3545;
+      background-color: #f8d7da;
+      border-radius: var(--border-radius);
+    }
+    
+    .chevron-icon {
+      transition: transform 0.3s ease;
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+    
+    .card.active .chevron-icon {
+      transform: rotate(180deg);
+    }
+    .card.full-width {
+  grid-column: 1 / -1;
+}
+
+    
+    @media (max-width: 768px) {
+      .cards-container {
+        grid-template-columns: 1fr;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1><i class="fas fa-university header-icon"></i>학교별 학생 현황</h1>
+
+  <div id="schoolList" class="loading">
+    <div class="spinner"><i class="fas fa-spinner fa-spin"></i> 데이터를 불러오는 중...</div>
+  </div>
+
+  <script>
+    const BASE_URL = 'https://supermax.kr/college';
+
+    async function loadAndGroupStudents() {
+      try {
+        const res = await fetch(`${BASE_URL}/students`);
+        const students = await res.json();
+
+        // 학교별로 그룹화 (N수생 제외)
+        const schoolMap = {};
+        const retakers = [];
+        
+        students.forEach(s => {
+          if (s.grade === 'N') {
+            retakers.push(s);
+          } else {
+            const school = s.school || '학교 미기재';
+            if (!schoolMap[school]) schoolMap[school] = [];
+            schoolMap[school].push(s);
+          }
+        });
+
+        const container = document.getElementById('schoolList');
+        container.innerHTML = '';
+
+  const schoolNames = Object.keys(schoolMap).sort((a, b) => {
+  return schoolMap[b].length - schoolMap[a].length;
+});
+
+
+        // 일반 학교 카드 생성
+        if (schoolNames.length > 0) {
+          const schoolTitle = document.createElement('h2');
+          schoolTitle.className = 'section-title';
+          schoolTitle.innerHTML = '<i class="fas fa-school"></i> 학교별 학생 현황';
+          container.appendChild(schoolTitle);
+          
+          const schoolGrid = document.createElement('div');
+          schoolGrid.className = 'cards-container';
+          
+          schoolNames.forEach(school => {
+            const group = schoolMap[school];
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+              <div class="card-header">
+                <span>${school}</span>
+                <div>
+                  <span class="card-count">${group.length}명</span>
+                  <i class="fas fa-chevron-down chevron-icon"></i>
+                </div>
+              </div>
+              <div class="card-body">
+                <ul class="student-list">
+                  ${group.map(s => `
+                    <li class="student-item">
+                      <div class="student-info">
+                        <span class="student-name">${s.name}</span>
+                        <span class="student-gender">(${s.gender})</span>
+                      </div>
+                      <span class="student-grade">${s.grade}학년</span>
+                    </li>
+                  `).join('')}
+                </ul>
+              </div>
+            `;
+            
+            // 클릭 이벤트 추가
+            const header = card.querySelector('.card-header');
+            header.addEventListener('click', () => {
+              card.classList.toggle('active');
+            });
+            
+            schoolGrid.appendChild(card);
+          });
+          container.appendChild(schoolGrid);
+        }
+
+        // N수생 섹션 추가
+        if (retakers.length > 0) {
+          const retakerTitle = document.createElement('h2');
+          retakerTitle.className = 'section-title';
+          retakerTitle.innerHTML = '<i class="fas fa-user-graduate"></i> N수생 현황';
+          container.appendChild(retakerTitle);
+          
+          const retakerGrid = document.createElement('div');
+          retakerGrid.className = 'cards-container';
+          
+          const card = document.createElement('div');
+card.className = 'card full-width';
+
+          card.innerHTML = `
+            <div class="card-header">
+              <span>N수생</span>
+              <div>
+                <span class="card-count">${retakers.length}명</span>
+                <i class="fas fa-chevron-down chevron-icon"></i>
+              </div>
+            </div>
+            <div class="card-body">
+              <ul class="student-list">
+                ${retakers.map(s => `
+                  <li class="student-item">
+                    <div class="student-info">
+                      <span class="student-name">${s.name}</span>
+                      <span class="student-gender">(${s.gender})</span>
+                    </div>
+                    <span class="student-grade">N수</span>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          `;
+          
+          // 클릭 이벤트 추가
+          const header = card.querySelector('.card-header');
+          header.addEventListener('click', () => {
+            card.classList.toggle('active');
+          });
+          
+          retakerGrid.appendChild(card);
+          container.appendChild(retakerGrid);
+        }
+
+      } catch (err) {
+        document.getElementById('schoolList').innerHTML = `
+          <div class="error">
+            <i class="fas fa-exclamation-triangle"></i> 데이터를 불러오는 중 오류가 발생했습니다.<br>
+            나중에 다시 시도해주세요.
+          </div>
+        `;
+        console.error(err);
+      }
+    }
+
+    loadAndGroupStudents();
+  </script>
+</body>
+</html>
