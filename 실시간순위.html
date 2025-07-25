@@ -428,33 +428,59 @@ function updateRanking(event) {
       
       // 전체 순위 (해당 종목 기준)
       const overallRanking = [...allRecords]
-        .filter(r => r[valueCol] != null)
-        .sort((a, b) => {
-          // reverse 종목 확인 (값이 작을수록 좋은 기록)
-          const isReverse = event === '20m왕복달리기' || event === '10m왕복달리기';
-          return isReverse ? a[valueCol] - b[valueCol] : b[valueCol] - a[valueCol];
-        })
+.filter(r => {
+  const val = parseFloat(r[valueCol]);
+  return !isNaN(val);
+})
+
+.sort((a, b) => {
+  const isReverse = event === '20m왕복달리기' || event === '10m왕복달리기';
+  const aVal = parseFloat(a[valueCol]);
+  const bVal = parseFloat(b[valueCol]);
+  if (isNaN(aVal)) return 1;
+  if (isNaN(bVal)) return -1;
+  return isReverse ? aVal - bVal : bVal - aVal;
+})
+
         .slice(0, 5);
       
       // 남자 순위
       const maleRanking = [...allRecords]
         .filter(r => r.gender === '남' || r.gender === '남자')
-        .filter(r => r[valueCol] != null)
-        .sort((a, b) => {
-          const isReverse = event === '20m왕복달리기' || event === '10m왕복달리기';
-          return isReverse ? a[valueCol] - b[valueCol] : b[valueCol] - a[valueCol];
-        })
+.filter(r => {
+  const val = parseFloat(r[valueCol]);
+  return !isNaN(val);
+})
+.sort((a, b) => {
+  const isReverse = event === '20m왕복달리기' || event === '10m왕복달리기';
+  const aVal = parseFloat(a[valueCol]);
+  const bVal = parseFloat(b[valueCol]);
+  if (isNaN(aVal)) return 1;
+  if (isNaN(bVal)) return -1;
+  return isReverse ? aVal - bVal : bVal - aVal;
+})
+
         .slice(0, 5);
       
       // 여자 순위
       const femaleRanking = [...allRecords]
         .filter(r => r.gender === '여' || r.gender === '여자')
-        .filter(r => r[valueCol] != null)
-        .sort((a, b) => {
-          const isReverse = event === '20m왕복달리기' || event === '10m왕복달리기';
-          return isReverse ? a[valueCol] - b[valueCol] : b[valueCol] - a[valueCol];
-        })
+.filter(r => {
+  const val = parseFloat(r[valueCol]);
+  return !isNaN(val);
+})
+
+.sort((a, b) => {
+  const isReverse = event === '20m왕복달리기' || event === '10m왕복달리기';
+  const aVal = parseFloat(a[valueCol]);
+  const bVal = parseFloat(b[valueCol]);
+  if (isNaN(aVal)) return 1;
+  if (isNaN(bVal)) return -1;
+  return isReverse ? aVal - bVal : bVal - aVal;
+})
+
         .slice(0, 5);
+        
       
       // 단위 설정
       let unit = '';
@@ -485,20 +511,23 @@ function updateRanking(event) {
     }
     
     // 순위 아이템 렌더링
-    function renderRankItem(record, rank, valueKey, unit) {
-      return `
-        <div class="rank-item">
-          <div class="rank-number">${rank}</div>
-          <div class="rank-info">
-            <div class="rank-name">${record.name}</div>
-            <div class="rank-detail">
-              <span>${record.school} ${record.grade}</span>
-              <span class="rank-value">${record[valueKey]}${unit}</span>
-            </div>
-          </div>
+function renderRankItem(record, rank, valueKey, unit) {
+  const raw = record[valueKey];
+  const isValidNumber = !isNaN(parseFloat(raw));
+  return `
+    <div class="rank-item">
+      <div class="rank-number">${rank}</div>
+      <div class="rank-info">
+        <div class="rank-name">${record.name}</div>
+        <div class="rank-detail">
+          <span>${record.school} ${record.grade}</span>
+          <span class="rank-value">${isValidNumber ? raw + unit : '-'}</span>
         </div>
-      `;
-    }
+      </div>
+    </div>
+  `;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   populateMonthSelect();
 
