@@ -249,7 +249,6 @@
   <script>
     let isFetching = false;
 
-    // ✅ [수정 1] 종합 순위를 3가지로 분리
     const events = [
       '전체 순위',       // 모두 포함
       '입시반 전체 순위', // 3학년 대상
@@ -267,7 +266,7 @@
     let allRecords = [];
     
     document.addEventListener('DOMContentLoaded', () => {
-      populateMonthSelect();
+      populateMonthSelect(); // 수정된 함수가 여기서 실행됨
       fetchData().then(() => {
         updateRanking(events[currentEventIndex]);
         rotateEventLoop();
@@ -275,11 +274,14 @@
       setInterval(fetchData, 60000);
     });
 
+    // ✅ [수정] 이 함수를 통째로 교체!
     function populateMonthSelect() {
       const select = document.getElementById('monthSelect');
       const now = new Date();
       select.innerHTML = '';
-      for (let i = 0; i < 6; i++) {
+
+      // 현재 달 기준, 미래 2개월 ~ 과거 4개월 (총 7개월)을 표시하도록 변경
+      for (let i = -2; i <= 4; i++) { 
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -288,10 +290,16 @@
         option.textContent = `${year}-${month}`;
         select.appendChild(option);
       }
+
       const preOption = document.createElement('option');
       preOption.value = '예비반';
       preOption.textContent = '예비반';
       select.appendChild(preOption);
+      
+      // 페이지 로드 시 현재 월(예: 9월)이 기본 선택되도록 설정
+      const currentYear = now.getFullYear();
+      const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+      select.value = `${currentYear}-${currentMonth}`;
     }
     
     async function fetchData() {
@@ -330,10 +338,9 @@
       setTimeout(rotateEventLoop, 7000);
     }
     
-    // ✅ [수정 2] 종합 순위 케이스를 3가지로 나누어 처리
     function updateRanking(event) {
       const contentDiv = document.getElementById('content');
-      contentDiv.innerHTML = ''; // 화면 전환 시 부드럽게 초기화
+      contentDiv.innerHTML = ''; 
 
       if (event === '전체 순위') {
         showOverallRanking('all');
@@ -346,7 +353,6 @@
       }
     }
 
-    // ✅ [수정 3] classType에 따라 필터링하도록 기능 개선
     function showOverallRanking(classType) {
       const contentDiv = document.getElementById('content');
       
@@ -390,7 +396,6 @@
       contentDiv.innerHTML = html;
     }
     
-    // ✅ [수정 4] 종목별 순위를 4개 그룹으로 나누어 표시
     function showEventRanking(event) {
       const contentDiv = document.getElementById('content');
       
@@ -417,7 +422,6 @@
           .slice(0, 5);
       };
 
-      // 4개 그룹으로 데이터 필터링
       const entranceMale = sortAndFilter(allRecords.filter(r => parseInt(r.grade) === 3 && (r.gender === '남' || r.gender === '남자')));
       const entranceFemale = sortAndFilter(allRecords.filter(r => parseInt(r.grade) === 3 && (r.gender === '여' || r.gender === '여자')));
       const prepMale = sortAndFilter(allRecords.filter(r => [1, 2].includes(parseInt(r.grade)) && (r.gender === '남' || r.gender === '남자')));
