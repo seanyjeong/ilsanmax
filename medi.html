@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>MediaPipe Pose: Elbow-Ear Check</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background:#111; color:#eee; }
+    .wrap { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+    .controls { display:flex; gap:12px; align-items:center; margin-bottom:12px; }
+    .badge { display:inline-block; padding:4px 8px; border-radius:6px; background:#222; }
+    #video, #output { width: 100%; max-width: 960px; border-radius:12px; }
+    .row { display:grid; grid-template-columns: 1fr; gap:12px; }
+    .stat { position:absolute; left:12px; top:12px; background:rgba(0,0,0,.55); padding:8px 10px; border-radius:8px; line-height:1.5; }
+    .ok { color:#7CFC00; } .warn { color:#FF5E5E; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>MediaPipe Pose – 팔꿈치 vs. 귀 정렬 체크</h1>
+    <div class="controls">
+      <label class="badge">촬영 방향:
+        <select id="profileSide">
+          <option value="left">왼쪽 옆모습(오른쪽을 바라봄)</option>
+          <option value="right">오른쪽 옆모습(왼쪽을 바라봄)</option>
+        </select>
+      </label>
+      <span class="badge">Tip: 옆모습으로 촬영해야 정확해요.</span>
+    </div>
+
+    <div class="row">
+      <video id="video" playsinline></video>
+      <div style="position:relative;">
+        <canvas id="output"></canvas>
+        <div id="stat" class="stat">loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MediaPipe CDN (Classic Solutions) -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('output');
+    const ctx = canvas.getContext('2d');
+    const stat = document.getElementById('stat');
+    const profileSideSel = document.getElementById('profileSide');
+
+    // 유틸: 각도 계산 (점 b를 꼭지점으로 a-b-c)
+    function angleDeg(a, b, c) {
+      const ab = {x: a.x - b.x, y: a.y - b.y};
+      const cb = {x: c.x - b.x, y: c.y - b.y};
+      const dot = (ab.x * cb.x + ab.y * cb.y);
+      const mag = Math.hypot(ab.x, ab.y) * Math.hypot(cb.x, cb.y) + 1e-9;
+      const cos = Math.min(Math.max(dot / mag, -1), 1);
+      return Math.round((Math.acos(cos) * 180) / Math.PI);
+    }
+
+    // 유틸: 0~1 좌표를 캔버스 픽셀로 변환
+    function toPixel(lm, w, h) {
+      return { x: lm.x * w, y: lm.y * h };
+    }
+
+    function drawTextBlock(lines, color="#fff") {
+      stat.innerHTML = lines.map(l => `<div>${l}</div>`).join("");
+      stat.style.color = color;
+    }
+
+    // Pose 세팅
+    const pose = new Pose.Pose({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+    });
+    pose.setOptions({
+      selfieMode: true,           // 미러 보기
+      modelComplexity: 1,
+      smoothLandmarks: true,
+      enableSegmentation: false,
+      minDetectionConfidence: 0.6,
+      minTrackingConfidence: 0.6
+    });
+
+    pose.onResults(onResults);
+
+    // 카메라 세팅
+    const camera = new Camera(video, {
+      onFrame: async () => { await pose.send({ image: video }); },
+      width: 960,
+      height: 540
+    });
+    camera.start();
+
+    function onResults(results) {
+      const {image, poseLandmarks: lm} = results;
+      canvas.width = image.width;
+      canvas.height = image.height;
+
+      ctx.save();
+      ctx.clearRect(0,0,canvas.width, canvas.height);
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      if (lm) {
+        // 랜드마크 그리기
+        drawConnectors(ctx, lm, Pose.POSE_CONNECTIONS, { color: '#00FFFF', lineWidth: 3 });
+        drawLandmarks(ctx, lm, { color: '#FF00FF', lineWidth: 1 });
+
+        // 관심 좌표 (왼쪽/오른쪽 신체)
+        // Mediapipe indices: 11 L-shoulder, 13 L-elbow, 15 L-wrist, 8 L-ear
+        //                     12 R-shoulder, 14 R-elbow, 16 R-wrist, 7 R-ear
+        const side = profileSideSel.value; // 'left'면 왼쪽 옆모습(오른쪽 바라봄)
+        const useLeft = (side === 'left'); // 왼쪽 옆모습이면 화면 기준 왼팔 추적이 일반적으로 보기 편함
+
+        const SH = lm[useLeft ? 11 : 12]; // shoulder
+        const EL = lm[useLeft ? 13 : 14]; // elbow
+        const WR = lm[useLeft ? 15 : 16]; // wrist
+        const EAR = lm[useLeft ? 8  : 7 ]; // ear
+
+        const pSH = toPixel(SH, canvas.width, canvas.height);
+        const pEL = toPixel(EL, canvas.width, canvas.height);
+        const pWR = toPixel(WR, canvas.width, canvas.height);
+        const pEAR = toPixel(EAR, canvas.width, canvas.height);
+
+        // 팔꿈치 각도
+        const elbowAngle = angleDeg(pSH, pEL, pWR);
+
+        // “팔꿈치가 귀보다 앞인가?” 판별 (옆모습 전제)
+        // 화면이 selfieMode(true)라 좌우가 반전되어 보입니다.
+        // 옆모습 규칙:
+        //  - 왼쪽 옆모습(오른쪽을 바라봄): 팔꿈치가 "오른쪽(작은 x)"으로 나올수록 앞
+        //  - 오른쪽 옆모습(왼쪽을 바라봄): 팔꿈치가 "왼쪽(큰 x)"으로 나올수록 앞
+        let elbowInFront = false;
+        if (side === 'left') {
+          // 얼굴이 오른쪽을 보니, 화면 기준 "x가 작아지면" 앞쪽
+          elbowInFront = (pEL.x < pEAR.x - 6); // 약간의 여유(6px) 허용
+        } else {
+          // 얼굴이 왼쪽을 보니, 화면 기준 "x가 커지면" 앞쪽
+          elbowInFront = (pEL.x > pEAR.x + 6);
+        }
+
+        // 시각화 포인트 (관심 지점 강조)
+        ctx.fillStyle = "#FFD400";
+        [pSH, pEL, pWR, pEAR].forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 6, 0, Math.PI*2);
+          ctx.fill();
+        });
+        ctx.fillStyle = "#fff";
+        ctx.font = "14px monospace";
+        ctx.fillText("Shoulder", pSH.x+8, pSH.y-8);
+        ctx.fillText("Elbow",    pEL.x+8, pEL.y-8);
+        ctx.fillText("Wrist",    pWR.x+8, pWR.y-8);
+        ctx.fillText("Ear",      pEAR.x+8, pEAR.y-8);
+
+        // 상태 표시
+        const lines = [
+          `Elbow Angle: ${elbowAngle}°`,
+          `Elbow in front of ear? ${elbowInFront ? 'YES' : 'NO'}`,
+          `Profile: ${side === 'left' ? '왼쪽 옆모습' : '오른쪽 옆모습'}`
+        ];
+        drawTextBlock(lines, elbowInFront ? '#FF5E5E' : '#7CFC00');
+
+        // 경고 표시 (팔꿈치가 앞이면 붉은 테두리)
+        if (elbowInFront) {
+          ctx.strokeStyle = "rgba(255, 94, 94, 0.8)";
+          ctx.lineWidth = 8;
+          ctx.strokeRect(4,4, canvas.width-8, canvas.height-8);
+        }
+      } else {
+        drawTextBlock(['No pose detected…'], '#fff');
+      }
+
+      ctx.restore();
+    }
+  </script>
+</body>
+</html>
