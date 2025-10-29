@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>개인 기록 히스토리</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- html2canvas + jsPDF -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <style>
+    :root {
+      --bg-grad-start:#0f172a;
+      --bg-grad-end:#1e293b;
+      --panel:#1e2538;
+      --panel-border:#2f384f;
+      --accent:#6366f1;
+      --accent-soft:rgba(99,102,241,.2);
+      --text:#f8fafc;
+      --text-dim:#94a3b8;
+      --radius:16px;
+      --shadow:0 24px 48px rgba(0,0,0,.6);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;}
+
+    body{
+      min-height:100vh;
+      font-family:'Noto Sans KR',system-ui,sans-serif;
+      background:
+        radial-gradient(circle at 20% 20%,rgba(99,102,241,.15) 0%,transparent 60%),
+        radial-gradient(circle at 80% 30%,rgba(14,165,233,.12) 0%,transparent 60%),
+        linear-gradient(135deg,var(--bg-grad-start),var(--bg-grad-end));
+      color:var(--text);
+      padding:20px 20px 80px; /* 밑에 살짝 여유 (버튼 겹침 방지) */
+      line-height:1.5;
+      position:relative;
+    }
+
+    /* PDF 저장 버튼 */
+    #btnDownload{
+      position:fixed;
+      top:16px;
+      right:16px;
+      z-index:9999;
+      background:var(--accent-soft);
+      border:1px solid var(--accent);
+      color:var(--accent);
+      font-family:'Montserrat',sans-serif;
+      font-size:0.8rem;
+      font-weight:600;
+      padding:8px 12px;
+      border-radius:10px;
+      cursor:pointer;
+      line-height:1.2;
+      box-shadow:0 10px 20px rgba(0,0,0,.6);
+    }
+    #btnDownload:hover{
+      box-shadow:0 16px 32px rgba(0,0,0,.8);
+      filter:brightness(1.1);
+    }
+
+    /* 전체 레이아웃 */
+    .layout{
+      max-width:1400px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      grid-template-rows:auto auto auto;
+      grid-gap:20px;
+
+      /* 캡쳐 안정성을 위해 반투명+블러 대신 단색 fallback 줄거야.
+         (PDF 캡쳐 시 이 영역의 backgroundColor를 강제로 이 색으로 바꿔서 찍을 거라서
+         여기서는 그냥 투명 유지해도 되고, 기본은 살짝 반투명 느낌 줌) */
+      background:rgba(15,23,42,0.0); /* 투명 느낌. 캡쳐 직전에 JS에서 진한 단색으로 바꿈 */
+      border-radius:12px;
+      padding-bottom:20px;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--panel-border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:20px 24px;
+    }
+
+    /* 상단 타이틀 행 */
+    .title-row{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .title-main{
+      font-family:'Montserrat',sans-serif;
+      font-size:1.1rem;
+      font-weight:600;
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .title-icon{
+      width:20px;
+      height:20px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .title-icon svg{
+      width:20px;
+      height:20px;
+      stroke:var(--accent);
+      stroke-width:1.8;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      filter:drop-shadow(0 0 4px rgba(99,102,241,.6));
+    }
+
+    .badge{
+      background:var(--accent-soft);
+      color:var(--accent);
+      font-size:0.7rem;
+      font-weight:600;
+      padding:4px 8px;
+      border-radius:8px;
+      border:1px solid var(--accent);
+      line-height:1.2;
+      font-family:'Montserrat',sans-serif;
+    }
+
+    label{
+      font-size:0.8rem;
+      font-weight:500;
+      color:var(--text-dim);
+      display:block;
+      margin-bottom:6px;
+    }
+
+    select{
+      width:100%;
+      background:#0f172a;
+      color:var(--text);
+      font-size:0.9rem;
+      line-height:1.2rem;
+      border-radius:10px;
+      padding:12px 14px;
+      border:1px solid var(--panel-border);
+      outline:none;
+      box-shadow:0 0 0 3px transparent;
+      transition:0.15s;
+      font-family:inherit;
+    }
+    select:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px var(--accent-soft);
+    }
+
+    .student-meta{
+      font-size:0.8rem;
+      color:var(--text-dim);
+      line-height:1.4;
+      text-align:right;
+    }
+    .student-meta strong{
+      color:var(--text);
+      font-weight:600;
+    }
+
+    /* 왼쪽: 학생 선택 카드 */
+    .student-card{
+      grid-column:1;
+    }
+
+    /* 로고 카드 */
+    .logo-card{
+      grid-column:2;
+      position:relative;
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:0 10px 25px rgba(0,0,0,0.4);
+    }
+
+    .logo-inner{
+      background:radial-gradient(circle at 50% 40%, rgba(255,255,255,0.18) 0%, rgba(30,37,56,0) 70%);
+      border:1px solid rgba(255,255,255,0.18);
+      border-radius:14px;
+      padding:18px 24px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:inset 0 2px 8px rgba(255,255,255,0.1);
+      min-height:120px;
+    }
+
+    .logo-img{
+      max-width:360px;
+      max-height:100px;
+      object-fit:contain;
+      filter:none;
+      image-rendering:-webkit-optimize-contrast;
+    }
+
+    .logo-subtext{
+      margin-top:12px;
+      font-size:0.75rem;
+      color:var(--text-dim);
+      font-weight:500;
+      line-height:1.4;
+      text-align:center;
+      font-family:'Montserrat',sans-serif;
+      letter-spacing:-0.02em;
+    }
+
+    /* 히스토리 카드 (표) */
+    .history-card{
+      grid-column:1 / span 2;
+    }
+
+    .table-wrapper{
+      max-height:300px;
+      overflow:auto;
+      border-radius:12px;
+      border:1px solid var(--panel-border);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:800px;
+      font-size:0.8rem;
+    }
+    thead{
+      background:#111827;
+      position:sticky;
+      top:0;
+      z-index:10;
+    }
+    th,td{
+      text-align:center;
+      padding:10px 8px;
+      border-bottom:1px solid rgba(148,163,184,.1);
+      color:var(--text);
+      white-space:nowrap;
+    }
+    th{
+      font-weight:600;
+      color:var(--text);
+      font-size:0.75rem;
+      font-family:'Montserrat',sans-serif;
+      text-transform:uppercase;
+      letter-spacing:.03em;
+    }
+    tbody tr:nth-child(even){
+      background:rgba(255,255,255,.02);
+    }
+    tbody tr:hover{
+      background:rgba(99,102,241,.07);
+    }
+
+    .score-td{
+      color:var(--accent);
+      font-weight:600;
+      font-family:'Montserrat',sans-serif;
+    }
+
+    .total-score-badge{
+      background:var(--accent-soft);
+      border:1px solid var(--accent);
+      color:var(--accent);
+      font-weight:600;
+      padding:4px 8px;
+      border-radius:8px;
+      font-size:0.7rem;
+      line-height:1.2;
+      display:inline-block;
+      min-width:3rem;
+      text-align:center;
+    }
+
+    .no-data{
+      text-align:center;
+      color:var(--text-dim);
+      padding:40px 0;
+      font-size:0.9rem;
+    }
+
+    /* 차트 그리드 */
+    .charts-grid{
+      grid-column:1 / span 2;
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));
+      grid-gap:20px;
+    }
+
+    .chart-card{
+      background:var(--panel);
+      border:1px solid var(--panel-border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px 20px 20px;
+      min-height:260px;
+      display:flex;
+      flex-direction:column;
+      position:relative;
+    }
+
+    .chart-header{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      margin-bottom:12px;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .chart-title{
+      font-size:0.9rem;
+      font-weight:600;
+      font-family:'Montserrat',sans-serif;
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .chart-icon{
+      width:18px;
+      height:18px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .chart-icon svg{
+      width:18px;
+      height:18px;
+      stroke:var(--accent);
+      stroke-width:1.8;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      filter:drop-shadow(0 0 4px rgba(99,102,241,.6));
+    }
+
+    .chart-unit{
+      font-size:0.7rem;
+      font-weight:500;
+      color:var(--text-dim);
+    }
+
+    .chart-avg{
+      font-size:0.7rem;
+      font-weight:500;
+      color:var(--accent);
+      background:var(--accent-soft);
+      border:1px solid var(--accent);
+      border-radius:8px;
+      padding:2px 6px;
+      line-height:1.2;
+    }
+
+    .badge-small{
+      background:var(--accent-soft);
+      color:var(--accent);
+      font-size:0.6rem;
+      font-weight:600;
+      padding:4px 6px;
+      border-radius:8px;
+      border:1px solid var(--accent);
+      line-height:1.2;
+      font-family:'Montserrat',sans-serif;
+      display:flex;
+      align-items:center;
+      gap:4px;
+    }
+    .badge-small svg{
+      width:14px;
+      height:14px;
+      stroke:var(--accent);
+      stroke-width:1.8;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    .chart-body{
+      position:relative;
+      width:100%;
+      height:180px;
+      flex:1;
+    }
+    .chart-body canvas{
+      position:absolute;
+      left:0;
+      top:0;
+      width:100% !important;
+      height:100% !important;
+    }
+
+    @media (max-width:900px){
+      .layout{
+        grid-template-columns:1fr;
+        grid-template-rows:auto auto auto auto;
+      }
+      .student-card{
+        grid-column:1;
+      }
+      .logo-card{
+        grid-column:1;
+      }
+      .history-card{
+        grid-column:1;
+      }
+      .charts-grid{
+        grid-column:1;
+      }
+      .student-meta{text-align:left;}
+    }
+
+    /* 스크롤바 */
+    ::-webkit-scrollbar { width:8px; }
+    ::-webkit-scrollbar-track {
+      background:rgba(255,255,255,0.05);
+      border-radius:10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background:linear-gradient(135deg,#6366f1,#0ea5e9);
+      border-radius:10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background:linear-gradient(135deg,#818cf8,#38bdf8);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PDF 저장 버튼 -->
+  <button id="btnDownload" onclick="saveCurrentPdf()">PDF 저장</button>
+
+  <div class="layout" id="captureRoot">
+    <!-- 왼쪽: 학생 선택 / 기본 정보 -->
+    <div class="card student-card">
+      <div class="title-row">
+        <div class="title-main">
+          <span class="title-icon">
+            <!-- Lucide clipboard-list -->
+            <svg viewBox="0 0 24 24">
+              <rect x="9" y="2" width="6" height="4" rx="1" ry="1"></rect>
+              <path d="M9 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-3"></path>
+              <path d="M9 12h6"></path>
+              <path d="M9 16h6"></path>
+              <path d="M9 8h6"></path>
+            </svg>
+          </span>
+          <span>개인 기록 조회</span>
+          <span class="badge">HISTORY</span>
+        </div>
+
+        <div class="student-meta" id="studentInfo">
+          학생을 선택하세요
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr;gap:16px;">
+        <div>
+          <label for="studentSelect">학생 이름</label>
+          <select id="studentSelect"></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 오른쪽: 로고 카드 -->
+    <div class="card logo-card">
+      <div class="logo-inner">
+        <!-- 여기 src는 실제 서버 경로로 바꾸면 CORS 없이 캡쳐됨 -->
+        <img
+          class="logo-img"
+          src="https://github.com/seanyjeong/ilsanmax/blob/main/%EC%9D%BC%EB%A7%A5%EB%A1%9C%EA%B3%A0400X110.png?raw=true"
+          alt="맥스체대입시 일산교육원 로고"
+        />
+      </div>
+      <div class="logo-subtext">
+        MAX 일산교육원 · 체대입시 실기 데이터
+      </div>
+    </div>
+
+    <!-- 히스토리 테이블 -->
+    <div class="card history-card">
+      <div class="title-row">
+        <div class="title-main">
+          <span class="title-icon">
+            <!-- Lucide list -->
+            <svg viewBox="0 0 24 24">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <circle cx="3" cy="6" r="1"></circle>
+              <circle cx="3" cy="12" r="1"></circle>
+              <circle cx="3" cy="18" r="1"></circle>
+            </svg>
+          </span>
+          <span>누적 기록 표</span>
+          <span class="badge">LOG</span>
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-dim);" id="historyCount">-</div>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="historyTable">
+          <thead>
+            <tr>
+              <th>테스트 회차</th>
+              <th>학교</th>
+              <th>학년</th>
+              <th>성별</th>
+              <th>제멀(CM)</th>
+              <th>20M(초)</th>
+              <th>10M(초)</th>
+              <th>좌전굴(CM)</th>
+              <th>윗몸(회)</th>
+              <th>배근력(KG)</th>
+              <th>메턴(M)</th>
+              <th>총점</th>
+            </tr>
+          </thead>
+          <tbody id="historyTbody">
+            <tr><td colspan="12" class="no-data">학생을 선택하세요</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 차트 그리드 -->
+    <div class="charts-grid">
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <span class="chart-icon">
+              <!-- Lucide activity -->
+              <svg viewBox="0 0 24 24">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+            </span>
+            <span>제자리멀리뛰기</span>
+            <span class="chart-unit">cm</span>
+            <span class="chart-avg" id="avgJump"></span>
+          </div>
+          <div class="badge-small">
+            <svg viewBox="0 0 24 24"><path d="M6 3v12"/><path d="M18 9v12"/><path d="M12 6v12"/></svg>
+            순발력
+          </div>
+        </div>
+        <div class="chart-body"><canvas id="chartJump"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <span class="chart-icon">
+              <!-- Lucide zap -->
+              <svg viewBox="0 0 24 24">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </span>
+            <span>20m 왕복달리기</span>
+            
+            <span class="chart-avg" id="avg20m"></span>
+          </div>
+          <div class="badge-small">
+            <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/></svg>
+            스피드
+          </div>
+        </div>
+        <div class="chart-body"><canvas id="chart20m"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <span class="chart-icon">
+              <!-- Lucide fast-forward -->
+              <svg viewBox="0 0 24 24">
+                <polygon points="13 19 22 12 13 5 13 19"></polygon>
+                <polygon points="2 19 11 12 2 5 2 19"></polygon>
+              </svg>
+            </span>
+            <span>10m 왕복달리기</span>
+            
+            <span class="chart-avg" id="avg10m"></span>
+          </div>
+          <div class="badge-small">
+            <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/></svg>
+            민첩성
+          </div>
+        </div>
+        <div class="chart-body"><canvas id="chart10m"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <span class="chart-icon">
+              <!-- Lucide dumbbell-ish -->
+              <svg viewBox="0 0 24 24">
+                <path d="M6 6v12"/>
+                <path d="M18 6v12"/>
+                <rect x="2" y="9" width="4" height="6" rx="1"/>
+                <rect x="18" y="9" width="4" height="6" rx="1"/>
+                <rect x="8" y="9" width="8" height="6" rx="1"/>
+              </svg>
+            </span>
+            <span>윗몸일으키기</span>
+            <span class="chart-unit">회</span>
+            <span class="chart-avg" id="avgSitup"></span>
+          </div>
+          <div class="badge-small">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 9v3l2 2"/></svg>
+            코어
+          </div>
+        </div>
+        <div class="chart-body"><canvas id="chartSitup"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <span class="chart-icon">
+              <!-- Lucide weight-ish -->
+              <svg viewBox="0 0 24 24">
+                <path d="M6.5 20h11l4-10-4-10h-11l-4 10z"/>
+                <path d="M10 10h4l1 2-1 2h-4l-1-2z"/>
+              </svg>
+            </span>
+            <span>배근력</span>
+            <span class="chart-unit">kg</span>
+            <span class="chart-avg" id="avgBack"></span>
+          </div>
+          <div class="badge-small">
+            <svg viewBox="0 0 24 24"><path d="M21 15V9"/><path d="M3 15V9"/><path d="M9 21V3"/><path d="M15 21V3"/></svg>
+            근력
+          </div>
+        </div>
+        <div class="chart-body"><canvas id="chartBack"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <span class="chart-icon">
+              <!-- Lucide stretch figure -->
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="4" r="2"></circle>
+                <path d="M10 22l2-4 2 4"/>
+                <path d="M12 14v4"/>
+                <path d="M9 9l3 5 3-5"/>
+                <path d="M5 15l4-6"/>
+                <path d="M19 15l-4-6"/>
+              </svg>
+            </span>
+            <span>좌전굴</span>
+            <span class="chart-unit">cm</span>
+            <span class="chart-avg" id="avgSitReach"></span>
+          </div>
+          <div class="badge-small">
+            <svg viewBox="0 0 24 24"><path d="M21 3H3v18h18V3z"/><path d="M9 9h6v6H9z"/></svg>
+            유연성
+          </div>
+        </div>
+        <div class="chart-body"><canvas id="chartSitReach"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <span class="chart-icon">
+              <!-- Lucide target -->
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="6"/>
+                <circle cx="12" cy="12" r="2"/>
+              </svg>
+            </span>
+            <span>메디신볼던지기</span>
+            <span class="chart-unit">m</span>
+            <span class="chart-avg" id="avgMedball"></span>
+          </div>
+          <div class="badge-small">
+            <svg viewBox="0 0 24 24"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>
+            파워
+          </div>
+        </div>
+        <div class="chart-body"><canvas id="chartMedball"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <span class="chart-icon">
+              <!-- Lucide star -->
+              <svg viewBox="0 0 24 24">
+                <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"></polygon>
+              </svg>
+            </span>
+            <span>총점</span>
+            <span class="chart-unit">점</span>
+            <span class="chart-avg" id="avgTotal"></span>
+          </div>
+          <div class="badge-small">
+            <svg viewBox="0 0 24 24"><path d="M3 3h18v4H3z"/><path d="M3 11h18v4H3z"/><path d="M3 19h18v2H3z"/></svg>
+            종합
+          </div>
+        </div>
+        <div class="chart-body"><canvas id="chartTotal"></canvas></div>
+      </div>
+
+    </div><!-- /.charts-grid -->
+  </div><!-- /.layout -->
+
+  <script>
+    // -----------------------
+    // 상태
+    // -----------------------
+    let students = [];        // [{name,school,grade,gender}]
+    let currentName = "";     // 현재 선택된 학생 이름
+    let currentHistory = [];  // [{test_month, school, grade, gender, ..., total_score}, ...]
+
+    const charts = {
+      jump: null,
+      run20m: null,
+      run10m: null,
+      situp: null,
+      back: null,
+      sitReach: null,
+      medball: null,
+      total: null
+    };
+
+    // -----------------------
+    // 유틸
+    // -----------------------
+    function parseYearFromTestMonth(tm){
+      if (!tm) return null;
+      const m = tm.match(/^(\d{4})[-\/.]/);
+      if (!m) return null;
+      return parseInt(m[1],10);
+    }
+
+    function buildGradeResolver(history){
+      let baseYear = null;
+      let baseGrade = null;
+      for (const row of history){
+        const y = parseYearFromTestMonth(row.test_month);
+        const g = parseInt(row.grade,10);
+        if (y && !isNaN(g)){
+          baseYear = y;
+          baseGrade = g;
+          break;
+        }
+      }
+
+      return function resolve(row){
+        const rawG = row.grade;
+        const y = parseYearFromTestMonth(row.test_month);
+        const gNum = parseInt(rawG,10);
+
+        if (!y || baseYear===null || baseGrade===null || isNaN(gNum)){
+          if (!isNaN(gNum)) {
+            return gNum + "학년";
+          } else {
+            return (rawG||"-")+"학년";
+          }
+        }
+
+        const diff = y - baseYear;
+        const displayGrade = baseGrade + diff;
+        return displayGrade + "학년";
+      };
+    }
+
+    // 평균 계산용: 숫자만 (F, 빈칸, 0 제외)
+    function cleanNumericArray(arr){
+      return arr
+        .map(v => {
+          if (v === null || v === undefined) return null;
+          if (typeof v === 'string' && v.trim().toUpperCase() === 'F') return null;
+          const n = parseFloat(v);
+          if (isNaN(n)) return null;
+          if (n === 0) return null;
+          return n;
+        })
+        .filter(v => v !== null);
+    }
+
+    function calcAvgOfClean(arr){
+      const cleaned = cleanNumericArray(arr);
+      if (cleaned.length === 0) return null;
+      const sum = cleaned.reduce((a,b)=>a+b,0);
+      return sum / cleaned.length;
+    }
+
+    // 차트 y데이터(F/빈칸/0 -> null로 해서 점 안 찍히게)
+    function toPlottableNumber(v){
+      if (v === null || v === undefined) return null;
+      if (typeof v === 'string' && v.trim().toUpperCase() === 'F') return null;
+      const n = parseFloat(v);
+      if (isNaN(n)) return null;
+      if (n === 0) return null;
+      return n;
+    }
+
+    function destroyIfExists(key){
+      if (charts[key]) {
+        charts[key].destroy();
+        charts[key] = null;
+      }
+    }
+
+    function valOrDash(v){
+      if (v === null || v === undefined || v === '') return '-';
+      return v;
+    }
+
+    function buildLineChart(ctxEl, labels, dataArr, labelText, yReverse=false){
+      const anyValid = dataArr.some(v => v !== null && v !== undefined && v !== '' && !Number.isNaN(v));
+      if (!anyValid) return null;
+
+      return new Chart(ctxEl, {
+        type:'line',
+        data:{
+          labels,
+          datasets:[{
+            label: labelText,
+            data: dataArr,
+            borderWidth:2,
+            pointRadius:4,
+            pointHoverRadius:5,
+            tension:0.3,
+            fill:false
+          }]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          scales:{
+            x:{
+              ticks:{ color:"#94a3b8", font:{size:11} },
+              grid:{ color:"rgba(148,163,184,0.1)" }
+            },
+            y:{
+              reverse:yReverse,
+              ticks:{ color:"#94a3b8", font:{size:11} },
+              grid:{ color:"rgba(148,163,184,0.1)" }
+            }
+          },
+          plugins:{
+            legend:{
+              labels:{ color:"#f8fafc", font:{size:12,family:'Montserrat'} }
+            }
+          }
+        }
+      });
+    }
+
+    function setAvgText(elId, avg, unit){
+      const box = document.getElementById(elId);
+      if (avg === null || avg === undefined || Number.isNaN(avg)) {
+        box.textContent = '';
+      } else {
+        box.textContent = `평균 ${avg.toFixed(2)}${unit}`;
+      }
+    }
+
+    // -----------------------
+    // 렌더링
+    // -----------------------
+    function renderStudentMeta() {
+      const infoEl = document.getElementById('studentInfo');
+      const stu = students.find(s => s.name === currentName);
+
+      if (!stu) {
+        infoEl.textContent = "학생을 선택하세요";
+        return;
+      }
+
+      // 최신 기록(마지막이 최신이라 가정)
+      const lastRow = currentHistory[currentHistory.length - 1] || {};
+      const gradeResolver = buildGradeResolver(currentHistory);
+      const displayGrade = lastRow
+        ? gradeResolver(lastRow)
+        : (stu.grade ? stu.grade+"학년" : "-학년");
+
+      infoEl.innerHTML = `
+        <strong>${stu.name}</strong><br>
+        ${lastRow.school || stu.school || '-'} ${displayGrade} / ${lastRow.gender || stu.gender || '-'}
+      `;
+    }
+
+    function renderHistoryTable() {
+      const tbody = document.getElementById('historyTbody');
+      const countEl = document.getElementById('historyCount');
+
+      if (!currentHistory.length) {
+        tbody.innerHTML = `<tr><td colspan="12" class="no-data">데이터 없음</td></tr>`;
+        countEl.textContent = "0회 테스트 기록";
+        return;
+      }
+
+      countEl.textContent = `${currentHistory.length}회 테스트 기록`;
+
+      const gradeResolver = buildGradeResolver(currentHistory);
+
+      tbody.innerHTML = currentHistory.map(row => {
+        const gdisp = gradeResolver(row);
+        return `
+          <tr>
+            <td>${row.test_month || '-'}</td>
+            <td>${row.school || '-'}</td>
+            <td>${gdisp}</td>
+            <td>${row.gender || '-'}</td>
+            <td>${valOrDash(row.jump_cm)}</td>
+            <td>${valOrDash(row.run20m_sec)}</td>
+            <td>${valOrDash(row.run10m_sec)}</td>
+            <td>${valOrDash(row.sit_reach_cm)}</td>
+            <td>${valOrDash(row.situp_count)}</td>
+            <td>${valOrDash(row.back_strength)}</td>
+            <td>${valOrDash(row.medball_m)}</td>
+            <td class="score-td">
+              <span class="total-score-badge">${valOrDash(row.total_score)}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderCharts() {
+      const labels      = currentHistory.map(h => h.test_month || '');
+
+      const jumpArrRaw     = currentHistory.map(h => h.jump_cm);
+      const run20mArrRaw   = currentHistory.map(h => h.run20m_sec);
+      const run10mArrRaw   = currentHistory.map(h => h.run10m_sec);
+      const situpArrRaw    = currentHistory.map(h => h.situp_count);
+      const backArrRaw     = currentHistory.map(h => h.back_strength);
+      const sitReachArrRaw = currentHistory.map(h => h.sit_reach_cm);
+      const medballArrRaw  = currentHistory.map(h => h.medball_m);
+      const totalArrRaw    = currentHistory.map(h => h.total_score);
+
+      // 평균 계산
+      const avgJump     = calcAvgOfClean(jumpArrRaw);
+      const avg20m      = calcAvgOfClean(run20mArrRaw);
+      const avg10m      = calcAvgOfClean(run10mArrRaw);
+      const avgSitup    = calcAvgOfClean(situpArrRaw);
+      const avgBack     = calcAvgOfClean(backArrRaw);
+      const avgSitReach = calcAvgOfClean(sitReachArrRaw);
+      const avgMedball  = calcAvgOfClean(medballArrRaw);
+      const avgTotal    = calcAvgOfClean(totalArrRaw);
+
+      setAvgText('avgJump',     avgJump,     'cm');
+      setAvgText('avg20m',      avg20m,      '초');
+      setAvgText('avg10m',      avg10m,      '초');
+      setAvgText('avgSitup',    avgSitup,    '회');
+      setAvgText('avgBack',     avgBack,     'kg');
+      setAvgText('avgSitReach', avgSitReach, 'cm');
+      setAvgText('avgMedball',  avgMedball,  'm');
+      setAvgText('avgTotal',    avgTotal,    '점');
+
+      // 차트용 데이터 (F/0/빈칸 null 처리)
+      const jumpArr     = currentHistory.map(h => toPlottableNumber(h.jump_cm));
+      const run20mArr   = currentHistory.map(h => toPlottableNumber(h.run20m_sec));
+      const run10mArr   = currentHistory.map(h => toPlottableNumber(h.run10m_sec));
+      const situpArr    = currentHistory.map(h => toPlottableNumber(h.situp_count));
+      const backArr     = currentHistory.map(h => toPlottableNumber(h.back_strength));
+      const sitReachArr = currentHistory.map(h => toPlottableNumber(h.sit_reach_cm));
+      const medballArr  = currentHistory.map(h => toPlottableNumber(h.medball_m));
+      const totalArr    = currentHistory.map(h => toPlottableNumber(h.total_score));
+
+      destroyIfExists('jump');
+      destroyIfExists('run20m');
+      destroyIfExists('run10m');
+      destroyIfExists('situp');
+      destroyIfExists('back');
+      destroyIfExists('sitReach');
+      destroyIfExists('medball');
+      destroyIfExists('total');
+
+      charts.jump     = buildLineChart(document.getElementById('chartJump').getContext('2d'),     labels, jumpArr,     '제자리멀리뛰기(cm)', false);
+      charts.run20m   = buildLineChart(document.getElementById('chart20m').getContext('2d'),      labels, run20mArr,   '20m 왕복달리기(초)', true);
+      charts.run10m   = buildLineChart(document.getElementById('chart10m').getContext('2d'),      labels, run10mArr,   '10m 왕복달리기(초)', true);
+      charts.situp    = buildLineChart(document.getElementById('chartSitup').getContext('2d'),    labels, situpArr,    '윗몸일으키기(회)',   false);
+      charts.back     = buildLineChart(document.getElementById('chartBack').getContext('2d'),     labels, backArr,     '배근력(kg)',        false);
+      charts.sitReach = buildLineChart(document.getElementById('chartSitReach').getContext('2d'), labels, sitReachArr, '좌전굴(cm)',        false);
+      charts.medball  = buildLineChart(document.getElementById('chartMedball').getContext('2d'),  labels, medballArr,  '메디신볼던지기(m)', false);
+      charts.total    = buildLineChart(document.getElementById('chartTotal').getContext('2d'),    labels, totalArr,    '총점(점)',          false);
+    }
+
+    // -----------------------
+    // 서버 통신
+    // -----------------------
+    async function loadStudentNames() {
+      // GET /college/student-names
+      // response: { success:true, students:[{name,school,grade,gender}...] }
+      const res = await fetch('https://supermax.kr/college/student-names');
+      const data = await res.json();
+      if (!data.success || !data.students) {
+        console.warn("학생 목록 없음");
+        return;
+      }
+      students = data.students;
+      fillStudentSelect();
+    }
+
+    async function loadHistoryByName(name) {
+      // GET /college/student-history-by-name?name=...
+      const res = await fetch(
+        'https://supermax.kr/college/student-history-by-name?name='
+        + encodeURIComponent(name)
+      );
+      const data = await res.json();
+      if (!data.success || !data.history) {
+        currentHistory = [];
+      } else {
+        currentHistory = data.history;
+      }
+    }
+
+    // -----------------------
+    // 이벤트 / 초기화
+    // -----------------------
+    function fillStudentSelect() {
+      const sel = document.getElementById('studentSelect');
+      sel.innerHTML = "";
+      students.forEach(stu => {
+        const opt = document.createElement('option');
+        opt.value = stu.name;
+        opt.textContent = stu.name;
+        sel.appendChild(opt);
+      });
+
+      if (students.length > 0) {
+        sel.value = students[0].name;
+        handleStudentChange();
+      }
+    }
+
+    async function handleStudentChange() {
+      const sel = document.getElementById('studentSelect');
+      currentName = sel.value;
+
+      await loadHistoryByName(currentName);
+
+      renderStudentMeta();
+      renderHistoryTable();
+      renderCharts();
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadStudentNames();
+      document
+        .getElementById('studentSelect')
+        .addEventListener('change', handleStudentChange);
+    });
+
+    // -----------------------
+    // PDF 저장
+    // -----------------------
+    async function saveCurrentPdf() {
+      // 파일명
+      const sel = document.getElementById('studentSelect');
+      const studentName = sel && sel.value ? sel.value : '학생';
+
+      // 차트 리사이즈 동기화
+      Object.values(charts).forEach(ch => {
+        if (ch && ch.resize) {
+          ch.resize();
+        }
+      });
+      await new Promise(r => setTimeout(r, 300));
+
+      // 캡쳐 대상
+      const root = document.getElementById('captureRoot');
+
+      // ✨ 캡쳐 직전: 배경을 딥네이비 단색으로 강제 세팅
+      // (html2canvas는 blur/반투명 효과를 캔버스로 rasterize할 때 약간 뿌옇게 되거나
+      // 투명 영역이 회색처럼 보일 수 있어서, 그냥 확실하게 깔끔하게 한 톤 칠해버림)
+      const originalBg = root.style.background;
+      root.style.background = '#0f172a';
+
+      // 고해상도 캡쳐
+      const canvas = await html2canvas(root, {
+        backgroundColor: null,
+        scale: window.devicePixelRatio * 2, // 훨씬 선명하게
+        useCORS: true
+      });
+
+      // 캡쳐 후 원상복구
+      root.style.background = originalBg;
+
+      const imgData = canvas.toDataURL('image/png');
+
+      // px -> mm 변환
+      const dpi = 96; // 대략적인 화면 dpi 가정
+      const mmPerPx = 25.4 / dpi;
+      const pdfWidthMM  = canvas.width * mmPerPx;
+      const pdfHeightMM = canvas.height * mmPerPx;
+
+      // jsPDF 인스턴스 (커스텀 한 장짜리)
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation: pdfWidthMM > pdfHeightMM ? 'l' : 'p',
+        unit: 'mm',
+        format: [pdfWidthMM, pdfHeightMM]
+      });
+
+      // 꽉 채우기
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidthMM, pdfHeightMM);
+
+      // 저장
+      pdf.save(`${studentName}-일산맥스실기분석표.pdf`);
+    }
+  </script>
+</body>
+</html>
