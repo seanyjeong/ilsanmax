@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -194,15 +193,16 @@
       gap: 10px;
       margin: 20px 0;
     }
+
     .search-input {
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  height: 40px;
-  width: 200px;
-  box-sizing: border-box;
-}
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      height: 40px;
+      width: 200px;
+      box-sizing: border-box;
+    }
     
     @media (max-width: 768px) {
       .card {
@@ -210,12 +210,11 @@
       }
       
       th, td {
-  padding: 12px 15px;
-  text-align: center; /* 왼쪽 -> 가운데로 변경 */
-  vertical-align: middle;
-  border-bottom: 1px solid var(--light-gray);
-}
-
+        padding: 12px 15px;
+        text-align: center;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--light-gray);
+      }
       
       .btn {
         padding: 10px 15px;
@@ -225,63 +224,61 @@
       h2 {
         font-size: 1.3rem;
       }
+
       th, td {
-    padding: 12px 15px;
-    text-align: center;
-    vertical-align: middle;
-    border-bottom: 1px solid var(--light-gray);
-  }
+        padding: 12px 15px;
+        text-align: center;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--light-gray);
+      }
   
-  /* No. 열과 학교 열 숨기기 */
-  th:nth-child(1),
-  td:nth-child(1),
-  th:nth-child(3),
-  td:nth-child(3) {
-    display: none;
-  }
+      /* No. 열과 학교 열 숨기기 */
+      th:nth-child(1),
+      td:nth-child(1),
+      th:nth-child(3),
+      td:nth-child(3) {
+        display: none;
+      }
   
-  /* 이름 열의 너비를 조정 */
-  th:nth-child(2),
-  td:nth-child(2) {
-    width: 25%;
-  }
+      /* 이름 열의 너비를 조정 */
+      th:nth-child(2),
+      td:nth-child(2) {
+        width: 25%;
+      }
   
-  /* 나머지 열의 너비 조정 */
-  th:nth-child(4),
-  td:nth-child(4),
-  th:nth-child(5),
-  td:nth-child(5)  {
-    width: 15%;
-  }
+      /* 나머지 열의 너비 조정 */
+      th:nth-child(4),
+      td:nth-child(4),
+      th:nth-child(5),
+      td:nth-child(5)  {
+        width: 15%;
+      }
 
-  th:nth-child(6),
-  td:nth-child(6){
-    width: 30%;
-  }
-  th:nth-child(7),
-  td:nth-child(7) {
-    width: 15%;
-  }
+      th:nth-child(6),
+      td:nth-child(6){
+        width: 30%;
+      }
+
+      th:nth-child(7),
+      td:nth-child(7) {
+        width: 15%;
+      }
     }
-    
-
   </style>
 </head>
 <body>
   <div class="container">
-    
     <div class="card">
       <h2><i class="fas fa-clipboard-list"></i> 실기 기록 입력</h2>
       
       <div class="filter-container">
         <div class="filter-item">
-            <label><i class="far fa-calendar-alt"></i> 테스트 월</label>
-            <input type="month" id="testMonth" onchange="loadStudents()">
-            <label style="margin-top:5px; display:block;">
-              <input type="checkbox" id="pretestCheck" onchange="loadStudents()"> 예비반 테스트로 등록
-            </label>
-          </div>
-          
+          <label><i class="far fa-calendar-alt"></i> 테스트 월</label>
+          <input type="month" id="testMonth" onchange="loadStudents()">
+          <label style="margin-top:5px; display:block;">
+            <input type="checkbox" id="pretestCheck" onchange="loadStudents()"> 선행반 테스트로 등록
+          </label>
+        </div>
         
         <div class="filter-item">
           <label><i class="fas fa-running"></i> 종목 선택</label>
@@ -303,32 +300,41 @@
   </div>
 
   <script>
-
-function filterByName() {
-  const input = document.getElementById('searchInput');
-  const filter = input.value.trim();
-  const rows = document.querySelectorAll('#recordArea table tbody tr');
-
-  rows.forEach(row => {
-    const nameCell = row.children[1]; // 이름이 두 번째 열
-    const name = nameCell.textContent || '';
-    if (name.includes(filter)) {
-      row.style.display = '';
-    } else {
-      row.style.display = 'none';
+    function getSelectedTestMonth() {
+      const isSeonhang = document.getElementById('pretestCheck').checked;
+      const rawMonth = document.getElementById('testMonth').value; // "2025-11"
+      if (!rawMonth) return '';
+      if (isSeonhang) {
+        const monthPart = rawMonth.split('-')[1]; // "11"
+        return `선행반 ${parseInt(monthPart, 10)}월`; // "선행반 11월"
+      } else {
+        return rawMonth; // "2025-11"
+      }
     }
-  });
-}
 
-async function loadStudents() {
-  const isPretest = document.getElementById('pretestCheck').checked;
-  const event = document.getElementById('eventSelect').value;
-  const month = isPretest ? '예비반' : document.getElementById('testMonth').value;
+    function filterByName() {
+      const input = document.getElementById('searchInput');
+      const filter = input.value.trim();
+      const rows = document.querySelectorAll('#recordArea table tbody tr');
 
-  if (!month || !event) return;
+      rows.forEach(row => {
+        const nameCell = row.children[1];
+        const name = nameCell.textContent || '';
+        if (name.includes(filter)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    async function loadStudents() {
+      const event = document.getElementById('eventSelect').value;
+      const month = getSelectedTestMonth();
+      if (!month || !event) return;
 
       try {
-        const res = await fetch(`https://supermax.kr/college/test-records?test_month=${month}`);
+        const res = await fetch(`https://supermax.kr/college/test-records?test_month=${encodeURIComponent(month)}`);
         const data = await res.json();
 
         const container = document.getElementById('recordArea');
@@ -362,47 +368,44 @@ async function loadStudents() {
           '10m왕복달리기': 'run10m_score'
         };
 
+        const headerShortName = {
+          '제자리멀리뛰기': '제멀',
+          '20m왕복달리기': '20m',
+          '10m왕복달리기': '10m',
+          '메디신볼던지기': '메던',
+          '윗몸일으키기': '윗몸',
+          '배근력': '배근력',
+          '좌전굴': '좌전굴'
+        };
+
         const valCol = valueColMap[event];
         const scoreCol = scoreColMap[event];
+        const shortName = headerShortName[event] || event;
 
-        const headerShortName = {
-  '제자리멀리뛰기': '제멀',
-  '20m왕복달리기': '20m',
-  '10m왕복달리기': '10m',
-  '메디신볼던지기': '메던',
-  '윗몸일으키기': '윗몸',
-  '배근력': '배근력',
-  '좌전굴': '좌전굴'
-};
+        let html = `
+          <div class="action-buttons">
+            <button class="btn" onclick="saveRecords('${event}')">
+              <i class="fas fa-save"></i> 저장하기
+            </button>
+            <input type="text" id="searchInput" class="search-input" placeholder="이름 검색..." onkeyup="filterByName()">
+          </div>
 
-const shortName = headerShortName[event] || event;
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>이름</th>
+                  <th>학교</th>
+                  <th>학년</th>
+                  <th>성별</th>
+                  <th>${shortName} 기록</th>
+                  <th>점수</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
 
-
-let html = `
-  <div class="action-buttons">
-    <button class="btn" onclick="saveRecords('${event}')">
-      <i class="fas fa-save"></i> 저장하기
-    </button>
-<input type="text" id="searchInput" class="search-input" placeholder="이름 검색..." onkeyup="filterByName()">
-  </div>
-
-  <div class="table-responsive">
-    <table>
-      <thead>
-        <tr>
-          <th>No.</th>
-          <th>이름</th>
-          <th>학교</th>
-          <th>학년</th>
-          <th>성별</th>
-          <th>${shortName} 기록</th>
-          <th>점수</th>
-        </tr>
-      </thead>
-      <tbody>
-`;
-
-        
         data.records.forEach((s, i) => {
           const val = s[valCol] ?? '';
           const score = s[scoreCol] ?? '';
@@ -452,8 +455,7 @@ let html = `
     }
 
     async function saveRecords(eventName) {
-  const isPretest = document.getElementById('pretestCheck').checked;
-  const month = isPretest ? '예비반' : document.getElementById('testMonth').value;
+      const month = getSelectedTestMonth();
       const inputs = document.querySelectorAll('.record-input');
       const records = [];
 
@@ -486,16 +488,14 @@ let html = `
     }
 
     async function calculateScore(input, event, gender) {
-  const value = input.value.trim();
-  const td = input.parentElement.nextElementSibling;
-  
-  if (!value) {
-    td.querySelector('.score-preview').textContent = '';
-    return;
-  }
-
-
-}
+      const value = input.value.trim();
+      const td = input.parentElement.nextElementSibling;
+      if (!value) {
+        td.querySelector('.score-preview').textContent = '';
+        return;
+      }
+      // 점수 실시간 계산 로직은 추후 연결
+    }
 
     function showAlert(message, type) {
       const alert = document.createElement('div');
@@ -530,8 +530,9 @@ let html = `
     }
 
     document.getElementById('pretestCheck').addEventListener('change', (e) => {
-    document.getElementById('testMonth').disabled = e.target.checked;
-  });
+      document.getElementById('testMonth').disabled = e.target.checked;
+      loadStudents();
+    });
   </script>
 </body>
 </html>
