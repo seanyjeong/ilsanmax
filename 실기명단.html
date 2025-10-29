@@ -136,10 +136,8 @@
     <h2><i class="fas fa-file-excel"></i> 엑셀 스타일 명단 등록</h2>
 
     <label for="testMonth">📅 등록할 월 선택</label><br>
-    <input type="month" id="testMonth">
-    <br>
-    <label><input type="checkbox" id="pretestCheck"> 예비반 테스트로 등록</label>
-    <br>
+    <input type="month" id="testMonth"><br>
+    <label><input type="checkbox" id="seonhangCheck"> 선행반 테스트로 등록</label><br>
     <button onclick="registerTableData()"><i class="fas fa-upload"></i> 전체 등록</button>
 
     <div class="tip-box">
@@ -160,79 +158,103 @@
       <tbody id="tableBody"></tbody>
     </table>
   </div>
+<script>
+  const tableBody = document.getElementById('tableBody');
+  for (let i = 1; i <= 70; i++) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i}</td>
+      <td contenteditable="true"></td>
+      <td contenteditable="true"></td>
+      <td contenteditable="true"></td>
+      <td contenteditable="true"></td>
+      <td class="result"></td>
+    `;
+    tableBody.appendChild(tr);
+  }
 
-  <script>
-    const tableBody = document.getElementById('tableBody');
-    for (let i = 1; i <= 70; i++) {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${i}</td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td class="result"></td>
-      `;
-      tableBody.appendChild(tr);
+  document.getElementById('excelTable').addEventListener('paste', function (e) {
+    const clipboardData = (e.clipboardData || window.clipboardData).getData('text');
+    const rows = clipboardData.split('\n').filter(r => r.trim() !== '');
+    const tableRows = document.querySelectorAll('#excelTable tbody tr');
+    e.preventDefault();
+
+    rows.forEach((rowData, rowIndex) => {
+      const cells = rowData.split('\t');
+      if (cells.length < 4 || rowIndex >= tableRows.length) return;
+      const tds = tableRows[rowIndex].querySelectorAll('td');
+      tds[1].innerText = cells[0]?.trim() || '';
+      tds[2].innerText = cells[1]?.trim() || '';
+      tds[3].innerText = cells[2]?.trim() || '';
+      tds[4].innerText = cells[3]?.trim() || '';
+    });
+  });
+
+  async function registerTableData() {
+    const isSeonhang = document.getElementById('seonhangCheck').checked;
+    const monthValue = document.getElementById('testMonth').value;
+    if (!monthValue) return alert('📅 등록할 월을 선택하세요!');
+
+    let testMonth;
+    if (isSeonhang) {
+      const monthPart = parseInt(monthValue.split('-')[1], 10);
+      testMonth = `선행반 ${monthPart}월`;
+    } else {
+      testMonth = monthValue;
     }
 
-    document.getElementById('excelTable').addEventListener('paste', function (e) {
-      const clipboardData = (e.clipboardData || window.clipboardData).getData('text');
-      const rows = clipboardData.split('\n').filter(r => r.trim() !== '');
-      const tableRows = document.querySelectorAll('#excelTable tbody tr');
+    const rows = document.querySelectorAll('#excelTable tbody tr');
+    let studentCount = 0;
 
-      e.preventDefault();
+    for (const row of rows) {
+      const cells = row.querySelectorAll('td');
+      const name = cells[1].innerText.trim();
+      const school = cells[2].innerText.trim();
+      const grade = cells[3].innerText.trim();
+      const gender = cells[4].innerText.trim();
+      const resultCell = cells[5];
 
-      rows.forEach((rowData, rowIndex) => {
-        const cells = rowData.split('\t');
-        if (cells.length < 4 || rowIndex >= tableRows.length) return;
+      if (!name || !school || !grade || !gender) continue;
+      studentCount++;
 
-        const tds = tableRows[rowIndex].querySelectorAll('td');
-        tds[1].innerText = cells[0]?.trim() || '';
-        tds[2].innerText = cells[1]?.trim() || '';
-        tds[3].innerText = cells[2]?.trim() || '';
-        tds[4].innerText = cells[3]?.trim() || '';
-      });
-    });
+      let examNumber = null;
 
-    async function registerTableData() {
-      const isPretest = document.getElementById('pretestCheck').checked;
-      const testMonth = isPretest ? '예비반' : document.getElementById('testMonth').value;
-      if (!testMonth) return alert('📅 월을 선택하거나 예비반 테스트를 체크하세요!');
+      // ✅ 선행반이면 YB + 연도 + 월 + 2자리 순번
+      if (isSeonhang) {
+        const [year, month] = monthValue.split('-');
+        const shortYear = year.slice(-2);
+        const formattedNum = String(studentCount).padStart(2, '0');
+        examNumber = `YB${shortYear}${month}${formattedNum}`;
+      }
 
-      const rows = document.querySelectorAll('#excelTable tbody tr');
+      try {
+        const bodyData = { name, school, grade, gender, test_month: testMonth };
+        if (examNumber) bodyData.exam_number = examNumber; // 선행반인 경우만 추가
 
-      for (const row of rows) {
-        const cells = row.querySelectorAll('td');
-        const name = cells[1].innerText.trim();
-        const school = cells[2].innerText.trim();
-        const grade = cells[3].innerText.trim();
-        const gender = cells[4].innerText.trim();
-        const resultCell = cells[5];
+        const res = await fetch('https://supermax.kr/college/test-students', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bodyData)
+        });
 
-        if (!name || !school || !grade || !gender) continue;
+        const data = await res.json();
 
-        try {
-          const res = await fetch('https://supermax.kr/college/test-students', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, school, grade, gender, test_month: testMonth })
-          });
-
-          const data = await res.json();
-          if (data.success) {
-            resultCell.textContent = `✅ ${data.exam_number}`;
-            resultCell.className = 'result success';
-          } else {
-            resultCell.textContent = '❌ 실패';
-            resultCell.className = 'result fail';
-          }
-        } catch (err) {
-          resultCell.textContent = '❌ 오류';
+        if (data.success) {
+          // 선행반이면 우리가 만든 번호 표시
+          resultCell.textContent = `✅ ${examNumber || data.exam_number}`;
+          resultCell.className = 'result success';
+        } else {
+          resultCell.textContent = '❌ 실패';
           resultCell.className = 'result fail';
         }
+      } catch {
+        resultCell.textContent = '❌ 오류';
+        resultCell.className = 'result fail';
       }
     }
-  </script>
+  }
+</script>
+
+
 </body>
 </html>
