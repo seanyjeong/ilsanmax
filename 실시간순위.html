@@ -4,391 +4,785 @@
   <meta charset="UTF-8">
   <title>맥스체대입시 실기 테스트 순위</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #2c3e50;
-      --secondary: #3498db;
-      --accent: #e74c3c;
-      --light: #ecf0f1;
-      --dark: #2c3e50;
-      --text: #333;
-      --border-radius: 10px;
-      --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      --transition: all 0.5s ease;
+      --primary: #6a11cb;
+      --secondary: #2575fc;
+      --accent: #ff2d75;
+      --dark: #121212;
+      --light: rgba(255, 255, 255, 0.85);
+      --glass: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --text: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --border-radius: 16px;
+      --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      --transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
     
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
     }
     
     body {
       font-family: 'Noto Sans KR', sans-serif;
-      background-color: #f5f7fa;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
       color: var(--text);
       line-height: 1.6;
       overflow: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+    
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(255, 45, 117, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(37, 117, 252, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(106, 17, 203, 0.1) 0%, transparent 50%);
+      z-index: -1;
     }
     
     .container {
       width: 100vw;
       height: 100vh;
-      padding: 20px;
+      padding: 15px;
       display: flex;
       flex-direction: column;
+      position: relative;
+      overflow: hidden;
     }
     
     .header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       padding: 15px;
-      background-color: white;
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border-radius: var(--border-radius);
       box-shadow: var(--box-shadow);
+      border: 1px solid var(--glass-border);
+      position: relative;
+      overflow: hidden;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--secondary));
     }
     
     .header h1 {
-      color: var(--primary);
-      font-size: 2.2rem;
+      color: var(--text);
+      font-size: 1.8rem;
       margin-bottom: 5px;
+      font-weight: 800;
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(90deg, #fff, #e0e0e0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      line-height: 1.3;
     }
     
+    .tagline {
+      font-size: 1rem;
+      color: var(--text);
+      margin: 8px 0 15px;
+      text-align: center;
+      font-weight: 500;
+      font-style: italic;
+      opacity: 0.9;
+    }
+
     .content {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 15px;
+      position: relative;
+      min-height: 0;
     }
     
     .rank-board {
       flex: 1;
-      background-color: white;
+      background: var(--glass);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
       border-radius: var(--border-radius);
       box-shadow: var(--box-shadow);
       padding: 20px;
       display: flex;
       flex-direction: column;
       transition: var(--transition);
+      border: 1px solid var(--glass-border);
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+    
+    .rank-board::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--secondary));
     }
     
     .rank-title {
-      font-size: 1.8rem;
-      color: var(--secondary);
+      font-size: 1.6rem;
+      color: var(--text);
       margin-bottom: 15px;
       text-align: center;
       font-weight: 700;
+      font-family: 'Montserrat', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .rank-title::before, .rank-title::after {
+      content: '';
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .rank-title-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      color: var(--text);
     }
     
     .rank-container {
       display: flex;
       flex: 1;
-      gap: 20px;
+      gap: 15px;
+      min-height: 0;
     }
     
     .rank-column {
       flex: 1;
       display: flex;
       flex-direction: column;
+      min-height: 0;
     }
     
     .rank-column h3 {
-      background-color: var(--primary);
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
       color: white;
       padding: 10px;
       border-radius: var(--border-radius);
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      font-weight: 600;
+      font-family: 'Montserrat', sans-serif;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+      font-size: 0.95rem;
+    }
+    
+    .rank-column h3::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+    
+    .rank-column:hover h3::after {
+      left: 100%;
     }
     
     .rank-item {
       display: flex;
       align-items: center;
-      padding: 10px;
-      margin-bottom: 8px;
-      background-color: var(--light);
+      padding: 12px;
+      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.1);
       border-radius: var(--border-radius);
+      transition: var(--transition);
+      border: 1px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .rank-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--accent), var(--secondary));
+      transform: scaleY(0);
+      transition: transform 0.3s ease;
+    }
+    
+    .rank-item:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--glass-border);
+    }
+    
+    .rank-item:hover::before {
+      transform: scaleY(1);
     }
     
     .rank-number {
-      width: 30px;
-      height: 30px;
-      background-color: var(--secondary);
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
       color: white;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-right: 10px;
+      margin-right: 12px;
       font-weight: bold;
+      font-family: 'Montserrat', sans-serif;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 1;
+      font-size: 0.9rem;
     }
     
-    .rank-info {
-      flex: 1;
+    .rank-number::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      border-radius: 50%;
+      z-index: -1;
+      opacity: 0.7;
+      filter: blur(5px);
+    }
+    
+    .rank-info { 
+      flex: 1; 
     }
     
     .rank-name {
-      font-weight: bold;
-      font-size: 1.1rem;
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 4px;
+      font-family: 'Montserrat', sans-serif;
     }
     
     .rank-detail {
       display: flex;
       justify-content: space-between;
-      font-size: 0.9rem;
-      color: #666;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
     }
     
     .rank-value {
-  font-size: 1.2rem;      /* 기존보다 살짝 큼 */
-  font-weight: 700;       /* 더 두껍게 */
-  color: var(--accent);   /* 기존 강조 색 유지 */
-}
-
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
     
     .footer {
       text-align: center;
-      padding: 30px;
+      padding: 15px;
+      margin-top: 15px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     .footer img {
-      max-height: 200px;
+      max-height: 50px;
+      filter: brightness(0) invert(1);
+      opacity: 0.9;
     }
     
-    /* 애니메이션 */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    .month-select-wrapper {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 50px;
+      padding: 8px 15px;
+      box-shadow: var(--box-shadow);
+      font-size: 0.9rem;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
     }
     
-    .fade-in {
-      animation: fadeIn 0.8s ease forwards;
+    .month-select-wrapper:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     }
     
+    .month-select-wrapper select {
+      border: none;
+      font-size: 0.9rem;
+      background: transparent;
+      outline: none;
+      cursor: pointer;
+      color: var(--text);
+      font-weight: 500;
+    }
+    
+    .month-select-wrapper select option {
+      background: var(--dark);
+      color: var(--text);
+    }
+    
+    .event-indicator {
+      position: fixed;
+      bottom: 15px;
+      left: 15px;
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 50px;
+      padding: 8px 15px;
+      box-shadow: var(--box-shadow);
+      font-size: 0.85rem;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+      line-height: 1.2;
+    }
+    
+    .event-indicator svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .pulse {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 0 rgba(255, 45, 117, 0.7);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 45, 117, 0.7);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(255, 45, 117, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 45, 117, 0);
+      }
+    }
+
+    /* 하단 탭 (종목들) */
+    .event-tabs {
+      position: fixed;
+      left: 50%;
+      bottom: 75px;
+      transform: translateX(-50%);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      max-width: 90vw;
+      z-index: 1000;
+    }
+
+    .event-tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 40px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      line-height: 1.2;
+      color: var(--text);
+      font-weight: 500;
+      box-shadow: var(--box-shadow);
+      cursor: pointer;
+      user-select: none;
+      transition: var(--transition);
+    }
+
+    .event-tab-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .event-tab-btn.active {
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      border: 1px solid transparent;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+
+    .event-tab-btn.active svg {
+      color: #fff;
+    }
+
+    .event-tab-btn:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+    }
+
     /* 반응형 */
     @media (max-width: 768px) {
-      .header h1 {
-        font-size: 1.8rem;
+      .header h1 { font-size: 1.5rem; }
+      .rank-title { font-size: 1.3rem; }
+      .rank-container { flex-direction: column; }
+
+      .container {
+        padding: 10px;
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
       }
-      
-      .rank-title {
-        font-size: 1.5rem;
+
+      .footer {
+        height: 60px;
       }
-      
-      .rank-container {
-        flex-direction: column;
+
+      .footer img {
+        max-height: 40px;
+      }
+
+      .month-select-wrapper,
+      .event-indicator {
+        position: relative;
+        bottom: auto;
+        right: auto;
+        left: auto;
+        margin: 10px auto;
+        width: 90%;
+        justify-content: center;
+      }
+
+      .event-tabs {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        transform: none;
+        margin: 10px auto 20px;
       }
     }
-    .tagline {
-  font-size: 1.2rem;
-  color: #333;
-  margin-top: 4px; /* 더 위로 붙이기 위해 줄임 */
-  text-align: center;
-  font-weight: 700;
-}
-.month-select-wrapper {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 4px 8px;
-  box-shadow: var(--box-shadow);
-  font-size: 0.9rem;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.month-select-wrapper select {
-  border: none;
-  font-size: 0.9rem;
-  background: transparent;
-  outline: none;
-  cursor: pointer;
-}
-
-
-
-
+    
+    /* 스크롤바 */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+    }
   </style>
-
-
 </head>
 <body>
   <div class="container">
     <div class="header">
-        <h1 id="mainTitle">맥스체대입시 일산교육원 예비반 공개테스트</h1>
-
+      <h1 id="mainTitle">맥스체대입시 일산교육원 공개테스트</h1>
     </div>
 
-      
     <p class="tagline">전국 체대입시 1위 맥스와 함께하면, 당신의 기록이 달라집니다.</p>
 
+    <div class="content" id="content"></div>
+
+    <div class="footer">
+      <img src="https://github.com/seanyjeong/supermax/blob/main/maxlogo.png?raw=true" alt="맥스체대입시 로고">
+    </div>
+      
+    <div class="month-select-wrapper">
+      <label for="monthSelect">📅</label>
+      <select id="monthSelect" onchange="handleMonthChange()"></select>
+    </div>
     
-    <div class="content" id="content">
-      <!-- 동적으로 생성될 순위판 -->
+    <div class="event-indicator">
+      <div class="pulse"></div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span id="indicatorIcon"></span>
+        <span id="currentEventText" style="font-weight:500;color:var(--text);"></span>
+      </div>
     </div>
 
-    
-    <div class="footer">
-        <img src="https://github.com/seanyjeong/supermax/blob/main/maxlogo.png?raw=true" alt="맥스체대입시 로고">
-      </div>
-      
-      <!-- 테스트 선택 드롭다운 (오른쪽 하단 고정) -->
-      <div class="month-select-wrapper">
-        <label for="monthSelect">📅</label>
-        <select id="monthSelect" onchange="fetchData()"></select>
-      </div>
-      
+    <div class="event-tabs" id="eventTabs"></div>
   </div>
 
   <script>
+    // 1. 종목 정의 + 표시용 라벨
+    const EVENT_DEFS = [
+      { key: '전체 순위', valueCol: null, reverse: false, unit: '점', label: '종합', icon: overallIcon },
+      { key: '제자리멀리뛰기', valueCol: 'jump_cm', reverse: false, unit: 'cm', label: '제멀', icon: jumpIcon },
+      { key: '20m왕복달리기', valueCol: 'run20m_sec', reverse: true, unit: '초', label: '20m', icon: sprintIcon },
+      { key: '좌전굴', valueCol: 'sit_reach_cm', reverse: false, unit: 'cm', label: '좌전굴', icon: stretchIcon },
+      { key: '윗몸일으키기', valueCol: 'situp_count', reverse: false, unit: '회', label: '윗몸', icon: situpIcon },
+      { key: '배근력', valueCol: 'back_strength', reverse: false, unit: 'kg', label: '배근력', icon: strengthIcon },
+      { key: '메디신볼던지기', valueCol: 'medball_m', reverse: false, unit: 'm', label: '메던', icon: ballIcon },
+      { key: '10m왕복달리기', valueCol: 'run10m_sec', reverse: true, unit: '초', label: '10m', icon: sprintIcon }
+    ];
 
-    let isFetching = false;
-    async function fetchData() {
-  try {
-    isFetching = true; // ⛳️ 데이터 로딩 시작
+    // 2. SVG 아이콘들 (lucide 스타일 라인아이콘 느낌)
+    function overallIcon() {
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M8 21h8M12 17v4M7 10h4v7H7zM13 6h4v11h-4zM5 3h14v3H5z"/>
+        </svg>
+      `;
+    }
+    function jumpIcon() {
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M9 11l3-3 3 3M12 8v8M4 20h16"/>
+        </svg>
+      `;
+    }
+    function sprintIcon() {
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M13 6l3-3 3 3M5 6h5l3 7-4 4M5 21l4-4"/>
+          <path d="M15 10l5 5"/>
+        </svg>
+      `;
+    }
+    function stretchIcon() {
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <circle cx="12" cy="5" r="2"/>
+          <path d="M9 22v-6l-2-4 5-2 5 2-2 4v6M12 13v3"/>
+        </svg>
+      `;
+    }
+    function situpIcon() {
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <circle cx="15" cy="4" r="2"/>
+          <path d="M4 20l6-6 3 1 4-4-2-2M2 22h8"/>
+        </svg>
+      `;
+    }
+    function strengthIcon() {
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <rect x="2" y="9" width="4" height="6" rx="1"/>
+          <rect x="18" y="9" width="4" height="6" rx="1"/>
+          <path d="M6 12h12"/>
+        </svg>
+      `;
+    }
+    function ballIcon() {
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/>
+        </svg>
+      `;
+    }
 
-    const selectedMonth = getSelectedTestMonth();
-    const res = await fetch(`https://supermax.kr/college/test-records?test_month=${selectedMonth}`);
-    const data = await res.json();
+    // 3. 전역 상태
+    let allRecords = [];        // 현재 월 데이터
+    let isFetching = false;     // fetch중인지
+    let availableEvents = [];   // 실제로 표시 가능한 종목 리스트 (EVENT_DEFS 일부)
+    let currentEventIdx = 0;    // availableEvents 기준 index
+    let autoRotateTimer = null;
 
-    if (data.success && data.records.length > 0) {
-      allRecords = data.records;
+    // 4. 유틸: 특정 종목에 데이터가 있는지 확인
+    function hasDataForEvent(def) {
+      if (def.key === '전체 순위') {
+        return allRecords.some(r => r.total_score && !isNaN(parseFloat(r.total_score)));
+      }
+      const col = def.valueCol;
+      if (!col) return false;
+      return allRecords.some(r => {
+        const v = parseFloat(r[col]);
+        return !isNaN(v);
+      });
+    }
 
-      const titleEl = document.getElementById('mainTitle');
-      if (selectedMonth === '예비반') {
-        titleEl.textContent = '맥스체대입시 일산교육원 예비반 공개테스트';
-      } else {
-        const [year, month] = selectedMonth.split('-');
-        titleEl.textContent = `맥스체대입시 일산교육원 ${year}년 ${parseInt(month)}월 공개테스트`;
+    // 5. 월 셀렉트 채우기
+    async function populateMonthSelect() {
+      const select = document.getElementById('monthSelect');
+      select.innerHTML = '';
+
+      try {
+        const res = await fetch('https://supermax.kr/college/test-months');
+        const data = await res.json();
+
+        if (!data.success || !data.months || data.months.length === 0) {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = '데이터 없음';
+          select.appendChild(opt);
+          return;
+        }
+
+        data.months.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m;
+          opt.textContent = m;
+          select.appendChild(opt);
+        });
+
+        select.value = data.months[0];
+      } catch (err) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = '로딩 실패';
+        select.appendChild(opt);
       }
     }
-  } catch (error) {
-    console.error('데이터 불러오기 오류:', error);
-  } finally {
-    isFetching = false; // ✅ 로딩 끝
-  }
-}
 
-
-    // 종목 리스트
-    const events = [
-      '전체 순위',
-      '제자리멀리뛰기',
-      '20m왕복달리기',
-      '좌전굴',
-      '윗몸일으키기',
-      '배근력',
-      '메디신볼던지기',
-      '10m왕복달리기'
-    ];
-    
-    let currentEventIndex = 0;
-    let allRecords = [];
-    
-    // 페이지 로드 시 데이터 불러오기
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchData();
-      setInterval(rotateEvent, 7000); // 7초마다 종목 변경
-      setInterval(fetchData, 30000); // 30초마다 데이터 갱신
-    });
-
-    function populateMonthSelect() {
-  const select = document.getElementById('monthSelect');
-  const now = new Date();
-
-  select.innerHTML = '';
-
-  // 최근 6개월 + 예비반
-  for (let i = 0; i < 6; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const option = document.createElement('option');
-    option.value = `${year}-${month}`;
-    option.textContent = `${year}-${month}`;
-    select.appendChild(option);
-  }
-
-  // 예비반 추가
-  const preOption = document.createElement('option');
-  preOption.value = '예비반';
-  preOption.textContent = '예비반';
-  select.appendChild(preOption);
-}
-
-    
-    // 데이터 불러오기
- 
-
-    
-    // 현재 월 (YYYY-MM 형식)
     function getSelectedTestMonth() {
-  const select = document.getElementById('monthSelect');
-  return select ? select.value : '';
-}
+      const select = document.getElementById('monthSelect');
+      return select ? select.value : '';
+    }
 
-    
-    // 종목 순환
-function rotateEventLoop() {
-  if (!isFetching) {
-    currentEventIndex = (currentEventIndex + 1) % events.length;
-    updateRanking(events[currentEventIndex]);
-  } else {
-    console.log('⏳ 데이터 갱신 중, 순위 스킵');
-  }
+    // 6. 데이터 불러오기 (월별)
+    async function fetchData() {
+      const selectedMonth = getSelectedTestMonth();
+      if (!selectedMonth) return;
+      isFetching = true;
 
-  setTimeout(rotateEventLoop, 7000);
-}
+      try {
+        const res = await fetch(`https://supermax.kr/college/test-records?test_month=${encodeURIComponent(selectedMonth)}`);
+        const data = await res.json();
 
+        if (data.success && data.records.length > 0) {
+          allRecords = data.records;
 
-    
-    // 순위 업데이트
-function updateRanking(event) {
-  const contentDiv = document.getElementById('content');
-  
-  // 강제 초기화
-  const clone = contentDiv.cloneNode(false);
-  contentDiv.parentNode.replaceChild(clone, contentDiv);
+          // 타이틀 업데이트
+          const titleEl = document.getElementById('mainTitle');
+          if (selectedMonth.startsWith('선행반')) {
+            titleEl.textContent = `맥스체대입시 일산교육원 ${selectedMonth} 공개테스트`;
+          } else if (selectedMonth.includes('-')) {
+            const parts = selectedMonth.split('-');
+            const year = parts[0];
+            const month = parts[1];
+            titleEl.textContent = `맥스체대입시 일산교육원 ${year}년 ${parseInt(month, 10)}월 공개테스트`;
+          } else {
+            titleEl.textContent = `맥스체대입시 일산교육원 ${selectedMonth} 공개테스트`;
+          }
 
-  if (event === '전체 순위') {
-    showOverallRanking();
-  } else {
-    showEventRanking(event);
-  }
-}
+          // availableEvents 재계산 (데이터 있는 종목만)
+          availableEvents = EVENT_DEFS.filter(def => hasDataForEvent(def));
 
-    // 전체 순위 표시
-    function showOverallRanking() {
-      const contentDiv = document.getElementById('content');
-      
-      // 전체 순위 (총점 기준)
+          // 만약 현재 index가 범위 밖이면 0으로
+          if (currentEventIdx >= availableEvents.length) {
+            currentEventIdx = 0;
+          }
+
+          // 탭 다시 그림
+          renderEventTabs();
+
+          // 현재 화면 그리기
+          renderCurrentEvent();
+        }
+      } catch (error) {
+        console.error('데이터를 불러오는 중 오류 발생:', error);
+      } finally {
+        isFetching = false;
+      }
+    }
+
+    // 7. 순위 아이템
+    function renderRankItem(record, rank, valueKey, unit) {
+      const raw = record[valueKey];
+      const isValidNumber = !isNaN(parseFloat(raw));
+      return `
+        <div class="rank-item">
+          <div class="rank-number">${rank}</div>
+          <div class="rank-info">
+            <div class="rank-name">${record.name}</div>
+            <div class="rank-detail">
+              <span>${record.school} ${record.grade}</span>
+              <span class="rank-value">${isValidNumber ? raw + unit : '-'}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 8. 전체 순위(총점)
+    function renderOverallRankingHTML() {
       const overallRanking = [...allRecords]
-        .filter(r => r.total_score)
-        .sort((a, b) => b.total_score - a.total_score)
+        .filter(r => r.total_score && !isNaN(parseFloat(r.total_score)))
+        .sort((a, b) => parseFloat(b.total_score) - parseFloat(a.total_score))
         .slice(0, 5);
-      
-      // 남자 순위
+
       const maleRanking = [...allRecords]
-        .filter(r => r.gender === '남' || r.gender === '남자')
-        .filter(r => r.total_score)
-        .sort((a, b) => b.total_score - a.total_score)
+        .filter(r => (r.gender === '남' || r.gender === '남자') && r.total_score && !isNaN(parseFloat(r.total_score)))
+        .sort((a, b) => parseFloat(b.total_score) - parseFloat(a.total_score))
         .slice(0, 5);
-      
-      // 여자 순위
+
       const femaleRanking = [...allRecords]
-        .filter(r => r.gender === '여' || r.gender === '여자')
-        .filter(r => r.total_score)
-        .sort((a, b) => b.total_score - a.total_score)
+        .filter(r => (r.gender === '여' || r.gender === '여자') && r.total_score && !isNaN(parseFloat(r.total_score)))
+        .sort((a, b) => parseFloat(b.total_score) - parseFloat(a.total_score))
         .slice(0, 5);
-      
-      const html = `
+
+      return `
         <div class="rank-board">
-          <h2 class="rank-title">🌟 전체 순위 TOP 5</h2>
+          <h2 class="rank-title">
+            <span class="rank-title-icon">${overallIcon()}</span>
+            <span>전체 순위 TOP 5</span>
+          </h2>
           <div class="rank-container">
             <div class="rank-column">
               <h3>종합 순위</h3>
@@ -405,142 +799,139 @@ function updateRanking(event) {
           </div>
         </div>
       `;
-      
-      contentDiv.innerHTML = html;
     }
-    
-    // 종목별 순위 표시
-    function showEventRanking(event) {
-      const contentDiv = document.getElementById('content');
-      
-      const columnMap = {
-        '제자리멀리뛰기': ['jump_cm', 'jump_score'],
-        '20m왕복달리기': ['run20m_sec', 'run20m_score'],
-        '좌전굴': ['sit_reach_cm', 'sit_score'],
-        '윗몸일으키기': ['situp_count', 'situp_score'],
-        '배근력': ['back_strength', 'back_score'],
-        '메디신볼던지기': ['medball_m', 'medball_score'],
-        '10m왕복달리기': ['run10m_sec', 'run10m_score']
-      };
-      
-      const [valueCol, scoreCol] = columnMap[event] || [];
-      if (!valueCol) return;
-      
-      // 전체 순위 (해당 종목 기준)
-      const overallRanking = [...allRecords]
-.filter(r => {
-  const val = parseFloat(r[valueCol]);
-  return !isNaN(val);
-})
 
-.sort((a, b) => {
-  const isReverse = event === '20m왕복달리기' || event === '10m왕복달리기';
-  const aVal = parseFloat(a[valueCol]);
-  const bVal = parseFloat(b[valueCol]);
-  if (isNaN(aVal)) return 1;
-  if (isNaN(bVal)) return -1;
-  return isReverse ? aVal - bVal : bVal - aVal;
-})
+    // 9. 종목별 순위
+    function renderEventRankingHTML(eventKey) {
+      const def = EVENT_DEFS.find(d => d.key === eventKey);
+      if (!def) return '';
+      const col = def.valueCol;
+      const reverse = def.reverse;
+      const unit = def.unit;
 
-        .slice(0, 5);
-      
-      // 남자 순위
-      const maleRanking = [...allRecords]
-        .filter(r => r.gender === '남' || r.gender === '남자')
-.filter(r => {
-  const val = parseFloat(r[valueCol]);
-  return !isNaN(val);
-})
-.sort((a, b) => {
-  const isReverse = event === '20m왕복달리기' || event === '10m왕복달리기';
-  const aVal = parseFloat(a[valueCol]);
-  const bVal = parseFloat(b[valueCol]);
-  if (isNaN(aVal)) return 1;
-  if (isNaN(bVal)) return -1;
-  return isReverse ? aVal - bVal : bVal - aVal;
-})
+      // 남/여 각각 정렬
+      function top5ByGender(genderCheck) {
+        return [...allRecords]
+          .filter(r => {
+            if (genderCheck === 'M') {
+              if (!(r.gender === '남' || r.gender === '남자')) return false;
+            } else {
+              if (!(r.gender === '여' || r.gender === '여자')) return false;
+            }
+            const v = parseFloat(r[col]);
+            return !isNaN(v);
+          })
+          .sort((a, b) => {
+            const aVal = parseFloat(a[col]);
+            const bVal = parseFloat(b[col]);
+            if (isNaN(aVal)) return 1;
+            if (isNaN(bVal)) return -1;
+            // reverse:true 는 낮을수록 좋은 기록 (달리기)
+            return reverse ? (aVal - bVal) : (bVal - aVal);
+          })
+          .slice(0, 5);
+      }
 
-        .slice(0, 5);
-      
-      // 여자 순위
-      const femaleRanking = [...allRecords]
-        .filter(r => r.gender === '여' || r.gender === '여자')
-.filter(r => {
-  const val = parseFloat(r[valueCol]);
-  return !isNaN(val);
-})
+      const maleRanking = top5ByGender('M');
+      const femaleRanking = top5ByGender('F');
 
-.sort((a, b) => {
-  const isReverse = event === '20m왕복달리기' || event === '10m왕복달리기';
-  const aVal = parseFloat(a[valueCol]);
-  const bVal = parseFloat(b[valueCol]);
-  if (isNaN(aVal)) return 1;
-  if (isNaN(bVal)) return -1;
-  return isReverse ? aVal - bVal : bVal - aVal;
-})
-
-        .slice(0, 5);
-        
-      
-      // 단위 설정
-      let unit = '';
-      if (event.includes('달리기')) unit = '초';
-      else if (event === '제자리멀리뛰기' || event === '좌전굴') unit = 'cm';
-      else if (event === '윗몸일으키기') unit = '회';
-      else if (event === '배근력') unit = 'kg';
-      else if (event === '메디신볼던지기') unit = 'm';
-      
-      const html = `
-  <div class="rank-board">
-    <h2 class="rank-title">🏆 ${event} TOP 5</h2>
-    <div class="rank-container">
-      <div class="rank-column">
-        <h3>남자 순위</h3>
-        ${maleRanking.map((r, i) => renderRankItem(r, i+1, valueCol, unit)).join('')}
-      </div>
-      <div class="rank-column">
-        <h3>여자 순위</h3>
-        ${femaleRanking.map((r, i) => renderRankItem(r, i+1, valueCol, unit)).join('')}
-      </div>
-    </div>
-  </div>
-`;
-
-      
-      contentDiv.innerHTML = html;
-    }
-    
-    // 순위 아이템 렌더링
-function renderRankItem(record, rank, valueKey, unit) {
-  const raw = record[valueKey];
-  const isValidNumber = !isNaN(parseFloat(raw));
-  return `
-    <div class="rank-item">
-      <div class="rank-number">${rank}</div>
-      <div class="rank-info">
-        <div class="rank-name">${record.name}</div>
-        <div class="rank-detail">
-          <span>${record.school} ${record.grade}</span>
-          <span class="rank-value">${isValidNumber ? raw + unit : '-'}</span>
+      return `
+        <div class="rank-board">
+          <h2 class="rank-title">
+            <span class="rank-title-icon">${def.icon()}</span>
+            <span>${eventKey} TOP 5</span>
+          </h2>
+          <div class="rank-container">
+            <div class="rank-column">
+              <h3>남자 순위</h3>
+              ${maleRanking.map((r, i) => renderRankItem(r, i+1, col, unit)).join('')}
+            </div>
+            <div class="rank-column">
+              <h3>여자 순위</h3>
+              ${femaleRanking.map((r, i) => renderRankItem(r, i+1, col, unit)).join('')}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  `;
-}
+      `;
+    }
 
-document.addEventListener('DOMContentLoaded', () => {
-  populateMonthSelect();
+    // 10. 현재 이벤트 화면 그리기
+    function renderCurrentEvent() {
+      if (!availableEvents.length) return;
+      const contentDiv = document.getElementById('content');
+      const def = availableEvents[currentEventIdx];
 
-  fetchData().then(() => {
-    updateRanking(events[currentEventIndex]); // 초기 1회
-    rotateEventLoop();                        // 이후 계속 순환
-  });
+      let html;
+      if (def.key === '전체 순위') {
+        html = renderOverallRankingHTML();
+      } else {
+        html = renderEventRankingHTML(def.key);
+      }
 
-  setInterval(fetchData, 60000); // 데이터 갱신만 60초마다
-});
+      contentDiv.innerHTML = html;
 
+      // indicator 업데이트
+      const indicatorText = document.getElementById('currentEventText');
+      const indicatorIcon = document.getElementById('indicatorIcon');
+      indicatorText.textContent = def.key;
+      indicatorIcon.innerHTML = def.icon();
+    }
 
+    // 11. 탭들 렌더링
+    function renderEventTabs() {
+      const tabsWrap = document.getElementById('eventTabs');
+      tabsWrap.innerHTML = '';
 
+      availableEvents.forEach((def, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'event-tab-btn' + (idx === currentEventIdx ? ' active' : '');
+        btn.innerHTML = `
+          <span class="tab-icon" style="display:flex;align-items:center;color:inherit;">${def.icon()}</span>
+          <span>${def.label}</span>
+        `;
+        btn.onclick = () => {
+          currentEventIdx = idx;
+          renderEventTabs();
+          renderCurrentEvent();
+        };
+        tabsWrap.appendChild(btn);
+      });
+    }
+
+    // 12. 자동 롤링
+    function startAutoRotate() {
+      stopAutoRotate(); // 혹시 중복 방지
+      autoRotateTimer = setInterval(() => {
+        if (isFetching || availableEvents.length === 0) return;
+        currentEventIdx = (currentEventIdx + 1) % availableEvents.length;
+        renderEventTabs();
+        renderCurrentEvent();
+      }, 7000);
+    }
+
+    function stopAutoRotate() {
+      if (autoRotateTimer) {
+        clearInterval(autoRotateTimer);
+        autoRotateTimer = null;
+      }
+    }
+
+    // 13. 월 바꾸면 다시 fetch
+    function handleMonthChange() {
+      fetchData();
+    }
+
+    // 14. 초기 로드
+    document.addEventListener('DOMContentLoaded', async () => {
+      await populateMonthSelect();
+      await fetchData();
+      renderCurrentEvent();
+      renderEventTabs();
+      startAutoRotate();
+
+      // 주기적으로 데이터 갱신
+      setInterval(fetchData, 60000);
+    });
   </script>
 </body>
 </html>
