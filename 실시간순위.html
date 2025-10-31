@@ -560,378 +560,362 @@
     <div class="event-tabs" id="eventTabs"></div>
   </div>
 
-  <script>
-    // 1. 종목 정의 + 표시용 라벨
-    const EVENT_DEFS = [
-      { key: '전체 순위', valueCol: null, reverse: false, unit: '점', label: '종합', icon: overallIcon },
-      { key: '제자리멀리뛰기', valueCol: 'jump_cm', reverse: false, unit: 'cm', label: '제멀', icon: jumpIcon },
-      { key: '20m왕복달리기', valueCol: 'run20m_sec', reverse: true, unit: '초', label: '20m', icon: sprintIcon },
-      { key: '좌전굴', valueCol: 'sit_reach_cm', reverse: false, unit: 'cm', label: '좌전굴', icon: stretchIcon },
-      { key: '윗몸일으키기', valueCol: 'situp_count', reverse: false, unit: '회', label: '윗몸', icon: situpIcon },
-      { key: '배근력', valueCol: 'back_strength', reverse: false, unit: 'kg', label: '배근력', icon: strengthIcon },
-      { key: '메디신볼던지기', valueCol: 'medball_m', reverse: false, unit: 'm', label: '메던', icon: ballIcon },
-      { key: '10m왕복달리기', valueCol: 'run10m_sec', reverse: true, unit: '초', label: '10m', icon: sprintIcon }
-    ];
+<script>
+  // ===== 아이콘/이벤트 정의는 그대로 =====
+  const EVENT_DEFS = [
+    { key: '전체 순위', valueCol: null, reverse: false, unit: '점', label: '종합', icon: overallIcon },
+    { key: '제자리멀리뛰기', valueCol: 'jump_cm', reverse: false, unit: 'cm', label: '제멀', icon: jumpIcon },
+    { key: '20m왕복달리기', valueCol: 'run20m_sec', reverse: true, unit: '초', label: '20m', icon: sprintIcon },
+    { key: '좌전굴', valueCol: 'sit_reach_cm', reverse: false, unit: 'cm', label: '좌전굴', icon: stretchIcon },
+    { key: '윗몸일으키기', valueCol: 'situp_count', reverse: false, unit: '회', label: '윗몸', icon: situpIcon },
+    { key: '배근력', valueCol: 'back_strength', reverse: false, unit: 'kg', label: '배근력', icon: strengthIcon },
+    { key: '메디신볼던지기', valueCol: 'medball_m', reverse: false, unit: 'm', label: '메던', icon: ballIcon },
+    { key: '10m왕복달리기', valueCol: 'run10m_sec', reverse: true, unit: '초', label: '10m', icon: sprintIcon }
+  ];
 
-    // 2. SVG 아이콘들 (lucide 스타일 라인아이콘 느낌)
-    function overallIcon() {
-      return `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-          <path d="M8 21h8M12 17v4M7 10h4v7H7zM13 6h4v11h-4zM5 3h14v3H5z"/>
-        </svg>
-      `;
-    }
-    function jumpIcon() {
-      return `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-          <path d="M9 11l3-3 3 3M12 8v8M4 20h16"/>
-        </svg>
-      `;
-    }
-    function sprintIcon() {
-      return `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-          <path d="M13 6l3-3 3 3M5 6h5l3 7-4 4M5 21l4-4"/>
-          <path d="M15 10l5 5"/>
-        </svg>
-      `;
-    }
-    function stretchIcon() {
-      return `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-          <circle cx="12" cy="5" r="2"/>
-          <path d="M9 22v-6l-2-4 5-2 5 2-2 4v6M12 13v3"/>
-        </svg>
-      `;
-    }
-    function situpIcon() {
-      return `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-          <circle cx="15" cy="4" r="2"/>
-          <path d="M4 20l6-6 3 1 4-4-2-2M2 22h8"/>
-        </svg>
-      `;
-    }
-    function strengthIcon() {
-      return `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-          <rect x="2" y="9" width="4" height="6" rx="1"/>
-          <rect x="18" y="9" width="4" height="6" rx="1"/>
-          <path d="M6 12h12"/>
-        </svg>
-      `;
-    }
-    function ballIcon() {
-      return `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="9"/>
-          <path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/>
-        </svg>
-      `;
-    }
+  function overallIcon() { return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 10h4v7H7zM13 6h4v11h-4zM5 3h14v3z"/></svg>`; }
+  function jumpIcon() { return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 11l3-3 3 3M12 8v8M4 20h16"/></svg>`; }
+  function sprintIcon() { return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M13 6l3-3 3 3M5 6h5l3 7-4 4M5 21l4-4"/><path d="M15 10l5 5"/></svg>`; }
+  function stretchIcon() { return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="M9 22v-6l-2-4 5-2 5 2-2 4v6M12 13v3"/></svg>`; }
+  function situpIcon() { return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="15" cy="4" r="2"/><path d="M4 20l6-6 3 1 4-4-2-2M2 22h8"/></svg>`; }
+  function strengthIcon() { return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="9" width="4" height="6" rx="1"/><rect x="18" y="9" width="4" height="6" rx="1"/><path d="M6 12h12"/></svg>`; }
+  function ballIcon() { return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg>`; }
 
-    // 3. 전역 상태
-    let allRecords = [];        // 현재 월 데이터
-    let isFetching = false;     // fetch중인지
-    let availableEvents = [];   // 실제로 표시 가능한 종목 리스트 (EVENT_DEFS 일부)
-    let currentEventIdx = 0;    // availableEvents 기준 index
-    let autoRotateTimer = null;
+  // ===== 전역 상태 =====
+  let allRecords = [];
+  let isFetching = false;
+  let availableEvents = [];
+  let currentEventIdx = 0;
+  let autoRotateTimer = null;
 
-    // 4. 유틸: 특정 종목에 데이터가 있는지 확인
-    function hasDataForEvent(def) {
-      if (def.key === '전체 순위') {
-        return allRecords.some(r => r.total_score && !isNaN(parseFloat(r.total_score)));
-      }
-      const col = def.valueCol;
-      if (!col) return false;
-      return allRecords.some(r => {
-        const v = parseFloat(r[col]);
-        return !isNaN(v);
-      });
+  // 가장 중요한 거! 지금 화면에서 선택한 달
+  let currentSelectedMonth = '';
+
+  function normalizeMonthStr(m) {
+    m = (m || '').trim();
+    if (/^\d{4}-\d{1,2}$/.test(m)) {
+      const [y, mo] = m.split('-');
+      return Number(y + String(mo).padStart(2, '0'));
     }
+    return 0;
+  }
 
-    // 5. 월 셀렉트 채우기
-    async function populateMonthSelect() {
-      const select = document.getElementById('monthSelect');
-      select.innerHTML = '';
+  async function populateMonthSelect(preserve = false) {
+    const select = document.getElementById('monthSelect');
+    const prev = preserve ? (select.value || '').trim() : '';
+    select.innerHTML = '';
 
-      try {
-        const res = await fetch('https://supermax.kr/college/test-months');
-        const data = await res.json();
+    try {
+      const res = await fetch('https://supermax.kr/college/test-months');
+      const data = await res.json();
 
-        if (!data.success || !data.months || data.months.length === 0) {
-          const opt = document.createElement('option');
-          opt.value = '';
-          opt.textContent = '데이터 없음';
-          select.appendChild(opt);
-          return;
-        }
-
-        data.months.forEach(m => {
-          const opt = document.createElement('option');
-          opt.value = m;
-          opt.textContent = m;
-          select.appendChild(opt);
-        });
-
-        select.value = data.months[0];
-      } catch (err) {
+      if (!data.success || !data.months || data.months.length === 0) {
         const opt = document.createElement('option');
         opt.value = '';
-        opt.textContent = '로딩 실패';
+        opt.textContent = '데이터 없음';
         select.appendChild(opt);
-      }
-    }
-
-    function getSelectedTestMonth() {
-      const select = document.getElementById('monthSelect');
-      return select ? select.value : '';
-    }
-
-    // 6. 데이터 불러오기 (월별)
-    async function fetchData() {
-      const selectedMonth = getSelectedTestMonth();
-      if (!selectedMonth) return;
-      isFetching = true;
-
-      try {
-        const res = await fetch(`https://supermax.kr/college/test-records?test_month=${encodeURIComponent(selectedMonth)}`);
-        const data = await res.json();
-
-        if (data.success && data.records.length > 0) {
-          allRecords = data.records;
-
-          // 타이틀 업데이트
-          const titleEl = document.getElementById('mainTitle');
-          if (selectedMonth.startsWith('선행반')) {
-            titleEl.textContent = `맥스체대입시 일산교육원 ${selectedMonth} 공개테스트`;
-          } else if (selectedMonth.includes('-')) {
-            const parts = selectedMonth.split('-');
-            const year = parts[0];
-            const month = parts[1];
-            titleEl.textContent = `맥스체대입시 일산교육원 ${year}년 ${parseInt(month, 10)}월 공개테스트`;
-          } else {
-            titleEl.textContent = `맥스체대입시 일산교육원 ${selectedMonth} 공개테스트`;
-          }
-
-          // availableEvents 재계산 (데이터 있는 종목만)
-          availableEvents = EVENT_DEFS.filter(def => hasDataForEvent(def));
-
-          // 만약 현재 index가 범위 밖이면 0으로
-          if (currentEventIdx >= availableEvents.length) {
-            currentEventIdx = 0;
-          }
-
-          // 탭 다시 그림
-          renderEventTabs();
-
-          // 현재 화면 그리기
-          renderCurrentEvent();
-        }
-      } catch (error) {
-        console.error('데이터를 불러오는 중 오류 발생:', error);
-      } finally {
-        isFetching = false;
-      }
-    }
-
-    // 7. 순위 아이템
-    function renderRankItem(record, rank, valueKey, unit) {
-      const raw = record[valueKey];
-      const isValidNumber = !isNaN(parseFloat(raw));
-      return `
-        <div class="rank-item">
-          <div class="rank-number">${rank}</div>
-          <div class="rank-info">
-            <div class="rank-name">${record.name}</div>
-            <div class="rank-detail">
-              <span>${record.school} ${record.grade}</span>
-              <span class="rank-value">${isValidNumber ? raw + unit : '-'}</span>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    // 8. 전체 순위(총점)
-    function renderOverallRankingHTML() {
-      const overallRanking = [...allRecords]
-        .filter(r => r.total_score && !isNaN(parseFloat(r.total_score)))
-        .sort((a, b) => parseFloat(b.total_score) - parseFloat(a.total_score))
-        .slice(0, 5);
-
-      const maleRanking = [...allRecords]
-        .filter(r => (r.gender === '남' || r.gender === '남자') && r.total_score && !isNaN(parseFloat(r.total_score)))
-        .sort((a, b) => parseFloat(b.total_score) - parseFloat(a.total_score))
-        .slice(0, 5);
-
-      const femaleRanking = [...allRecords]
-        .filter(r => (r.gender === '여' || r.gender === '여자') && r.total_score && !isNaN(parseFloat(r.total_score)))
-        .sort((a, b) => parseFloat(b.total_score) - parseFloat(a.total_score))
-        .slice(0, 5);
-
-      return `
-        <div class="rank-board">
-          <h2 class="rank-title">
-            <span class="rank-title-icon">${overallIcon()}</span>
-            <span>전체 순위 TOP 5</span>
-          </h2>
-          <div class="rank-container">
-            <div class="rank-column">
-              <h3>종합 순위</h3>
-              ${overallRanking.map((r, i) => renderRankItem(r, i+1, 'total_score', '점')).join('')}
-            </div>
-            <div class="rank-column">
-              <h3>남자 순위</h3>
-              ${maleRanking.map((r, i) => renderRankItem(r, i+1, 'total_score', '점')).join('')}
-            </div>
-            <div class="rank-column">
-              <h3>여자 순위</h3>
-              ${femaleRanking.map((r, i) => renderRankItem(r, i+1, 'total_score', '점')).join('')}
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    // 9. 종목별 순위
-    function renderEventRankingHTML(eventKey) {
-      const def = EVENT_DEFS.find(d => d.key === eventKey);
-      if (!def) return '';
-      const col = def.valueCol;
-      const reverse = def.reverse;
-      const unit = def.unit;
-
-      // 남/여 각각 정렬
-      function top5ByGender(genderCheck) {
-        return [...allRecords]
-          .filter(r => {
-            if (genderCheck === 'M') {
-              if (!(r.gender === '남' || r.gender === '남자')) return false;
-            } else {
-              if (!(r.gender === '여' || r.gender === '여자')) return false;
-            }
-            const v = parseFloat(r[col]);
-            return !isNaN(v);
-          })
-          .sort((a, b) => {
-            const aVal = parseFloat(a[col]);
-            const bVal = parseFloat(b[col]);
-            if (isNaN(aVal)) return 1;
-            if (isNaN(bVal)) return -1;
-            // reverse:true 는 낮을수록 좋은 기록 (달리기)
-            return reverse ? (aVal - bVal) : (bVal - aVal);
-          })
-          .slice(0, 5);
+        return;
       }
 
-      const maleRanking = top5ByGender('M');
-      const femaleRanking = top5ByGender('F');
+      const cleaned = data.months
+        .map(m => (m || '').trim())
+        .filter(m => m !== '');
 
-      return `
-        <div class="rank-board">
-          <h2 class="rank-title">
-            <span class="rank-title-icon">${def.icon()}</span>
-            <span>${eventKey} TOP 5</span>
-          </h2>
-          <div class="rank-container">
-            <div class="rank-column">
-              <h3>남자 순위</h3>
-              ${maleRanking.map((r, i) => renderRankItem(r, i+1, col, unit)).join('')}
-            </div>
-            <div class="rank-column">
-              <h3>여자 순위</h3>
-              ${femaleRanking.map((r, i) => renderRankItem(r, i+1, col, unit)).join('')}
-            </div>
-          </div>
-        </div>
-      `;
-    }
+      cleaned.sort((a, b) => normalizeMonthStr(b) - normalizeMonthStr(a));
 
-    // 10. 현재 이벤트 화면 그리기
-    function renderCurrentEvent() {
-      if (!availableEvents.length) return;
-      const contentDiv = document.getElementById('content');
-      const def = availableEvents[currentEventIdx];
-
-      let html;
-      if (def.key === '전체 순위') {
-        html = renderOverallRankingHTML();
-      } else {
-        html = renderEventRankingHTML(def.key);
-      }
-
-      contentDiv.innerHTML = html;
-
-      // indicator 업데이트
-      const indicatorText = document.getElementById('currentEventText');
-      const indicatorIcon = document.getElementById('indicatorIcon');
-      indicatorText.textContent = def.key;
-      indicatorIcon.innerHTML = def.icon();
-    }
-
-    // 11. 탭들 렌더링
-    function renderEventTabs() {
-      const tabsWrap = document.getElementById('eventTabs');
-      tabsWrap.innerHTML = '';
-
-      availableEvents.forEach((def, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'event-tab-btn' + (idx === currentEventIdx ? ' active' : '');
-        btn.innerHTML = `
-          <span class="tab-icon" style="display:flex;align-items:center;color:inherit;">${def.icon()}</span>
-          <span>${def.label}</span>
-        `;
-        btn.onclick = () => {
-          currentEventIdx = idx;
-          renderEventTabs();
-          renderCurrentEvent();
-        };
-        tabsWrap.appendChild(btn);
+      cleaned.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        select.appendChild(opt);
       });
-    }
 
-    // 12. 자동 롤링
-    function startAutoRotate() {
-      stopAutoRotate(); // 혹시 중복 방지
-      autoRotateTimer = setInterval(() => {
-        if (isFetching || availableEvents.length === 0) return;
-        currentEventIdx = (currentEventIdx + 1) % availableEvents.length;
+      if (preserve && prev && cleaned.includes(prev)) {
+        select.value = prev;
+        currentSelectedMonth = prev;
+      } else {
+        select.value = cleaned[0];
+        currentSelectedMonth = cleaned[0];
+      }
+    } catch (err) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = '로딩 실패';
+      select.appendChild(opt);
+    }
+  }
+
+  function getSelectedTestMonth() {
+    const select = document.getElementById('monthSelect');
+    return select ? (select.value || '').trim() : '';
+  }
+
+  // ===== 여기 핵심: 응답이 돌아왔을 때 "그 사이에 달이 바뀌었으면" 버리는 로직 =====
+  async function fetchData() {
+    const selectedMonth = getSelectedTestMonth();
+    if (!selectedMonth) return;
+
+    // 지금 이 요청이 어느 달을 위한 건지 표시
+    const requestForMonth = selectedMonth;
+    isFetching = true;
+
+    // 화면에 “이 달 기준으로 요청 중” 상태 유지
+    currentSelectedMonth = requestForMonth;
+
+    try {
+      const res = await fetch(`https://supermax.kr/college/test-records?test_month=${encodeURIComponent(requestForMonth)}`);
+      const data = await res.json();
+
+      // ✅ 여기서 체크: 사용자가 그 사이에 10월→11월로 또 바꿨으면
+      // 지금 받은 응답은 버린다.
+      if (currentSelectedMonth !== requestForMonth) {
+        // 그냥 무시
+        return;
+      }
+
+      if (data.success && data.records.length > 0) {
+        allRecords = data.records;
+
+        // 타이틀
+        const titleEl = document.getElementById('mainTitle');
+        if (requestForMonth.startsWith('선행반')) {
+          titleEl.textContent = `맥스체대입시 일산교육원 ${requestForMonth} 공개테스트`;
+        } else if (requestForMonth.includes('-')) {
+          const [year, month] = requestForMonth.split('-');
+          titleEl.textContent = `맥스체대입시 일산교육원 ${year}년 ${parseInt(month, 10)}월 공개테스트`;
+        } else {
+          titleEl.textContent = `맥스체대입시 일산교육원 ${requestForMonth} 공개테스트`;
+        }
+
+        // 이 달에 실제로 데이터 있는 종목만
+        const newAvailable = EVENT_DEFS.filter(def => hasDataForEvent(def));
+
+        // 종목이 0개라도 이전 달 거 날려버리면 "없어져버리는" 느낌이라
+        // 그냥 이전 거라도 보여주고 싶으면 여기에서 fallback 넣으면 돼
+        availableEvents = newAvailable.length > 0 ? newAvailable : EVENT_DEFS;
+
+        if (currentEventIdx >= availableEvents.length) currentEventIdx = 0;
+
         renderEventTabs();
         renderCurrentEvent();
-      }, 7000);
-    }
-
-    function stopAutoRotate() {
-      if (autoRotateTimer) {
-        clearInterval(autoRotateTimer);
-        autoRotateTimer = null;
+      } else {
+        // 이 달엔 데이터 없음
+        allRecords = [];
+        // 종목 탭은 남겨두자 (없어졌다는 느낌 안 나게)
+        renderEventTabs();
+        document.getElementById('content').innerHTML = `
+          <div class="rank-board">
+            <h2 class="rank-title"><span>데이터 없음</span></h2>
+            <p>해당 월(${requestForMonth})에는 공개테스트 데이터가 없습니다.</p>
+          </div>
+        `;
       }
+    } catch (error) {
+      console.error('데이터를 불러오는 중 오류 발생:', error);
+    } finally {
+      isFetching = false;
     }
+  }
 
-    // 13. 월 바꾸면 다시 fetch
-    function handleMonthChange() {
-      fetchData();
+  function hasDataForEvent(def) {
+    if (def.key === '전체 순위') {
+      return allRecords.some(r => r.total_score && !isNaN(parseFloat(r.total_score)));
     }
-
-    // 14. 초기 로드
-    document.addEventListener('DOMContentLoaded', async () => {
-      await populateMonthSelect();
-      await fetchData();
-      renderCurrentEvent();
-      renderEventTabs();
-      startAutoRotate();
-
-      // 주기적으로 데이터 갱신
-      setInterval(fetchData, 60000);
+    const col = def.valueCol;
+    if (!col) return false;
+    return allRecords.some(r => {
+      const v = parseFloat(r[col]);
+      return !isNaN(v);
     });
-  </script>
+  }
+
+  function renderRankItem(record, rank, valueKey, unit) {
+    const raw = record[valueKey];
+    const isValidNumber = !isNaN(parseFloat(raw));
+    return `
+      <div class="rank-item">
+        <div class="rank-number">${rank}</div>
+        <div class="rank-info">
+          <div class="rank-name">${record.name}</div>
+          <div class="rank-detail">
+            <span>${record.school} ${record.grade}</span>
+            <span class="rank-value">${isValidNumber ? raw + unit : '-'}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderOverallRankingHTML() {
+    const overallRanking = [...allRecords]
+      .filter(r => r.total_score && !isNaN(parseFloat(r.total_score)))
+      .sort((a, b) => parseFloat(b.total_score) - parseFloat(a.total_score))
+      .slice(0, 5);
+
+    const maleRanking = [...allRecords]
+      .filter(r => (r.gender === '남' || r.gender === '남자') && r.total_score && !isNaN(parseFloat(r.total_score)))
+      .sort((a, b) => parseFloat(b.total_score) - parseFloat(a.total_score))
+      .slice(0, 5);
+
+    const femaleRanking = [...allRecords]
+      .filter(r => (r.gender === '여' || r.gender === '여자') && r.total_score && !isNaN(parseFloat(r.total_score)))
+      .sort((a, b) => parseFloat(b.total_score) - parseFloat(a.total_score))
+      .slice(0, 5);
+
+    return `
+      <div class="rank-board">
+        <h2 class="rank-title">
+          <span class="rank-title-icon">${overallIcon()}</span>
+          <span>전체 순위 TOP 5</span>
+        </h2>
+        <div class="rank-container">
+          <div class="rank-column">
+            <h3>종합 순위</h3>
+            ${overallRanking.map((r, i) => renderRankItem(r, i+1, 'total_score', '점')).join('')}
+          </div>
+          <div class="rank-column">
+            <h3>남자 순위</h3>
+            ${maleRanking.map((r, i) => renderRankItem(r, i+1, 'total_score', '점')).join('')}
+          </div>
+          <div class="rank-column">
+            <h3>여자 순위</h3>
+            ${femaleRanking.map((r, i) => renderRankItem(r, i+1, 'total_score', '점')).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderEventRankingHTML(eventKey) {
+    const def = EVENT_DEFS.find(d => d.key === eventKey);
+    if (!def) return '';
+    const col = def.valueCol;
+    const reverse = def.reverse;
+    const unit = def.unit;
+
+    function top5ByGender(g) {
+      return [...allRecords]
+        .filter(r => {
+          if (g === 'M') {
+            if (!(r.gender === '남' || r.gender === '남자')) return false;
+          } else {
+            if (!(r.gender === '여' || r.gender === '여자')) return false;
+          }
+          const v = parseFloat(r[col]);
+          return !isNaN(v);
+        })
+        .sort((a, b) => {
+          const aVal = parseFloat(a[col]);
+          const bVal = parseFloat(b[col]);
+          if (isNaN(aVal)) return 1;
+          if (isNaN(bVal)) return -1;
+          return reverse ? (aVal - bVal) : (bVal - aVal);
+        })
+        .slice(0, 5);
+    }
+
+    const maleRanking = top5ByGender('M');
+    const femaleRanking = top5ByGender('F');
+
+    return `
+      <div class="rank-board">
+        <h2 class="rank-title">
+          <span class="rank-title-icon">${def.icon()}</span>
+          <span>${eventKey} TOP 5</span>
+        </h2>
+        <div class="rank-container">
+          <div class="rank-column">
+            <h3>남자 순위</h3>
+            ${maleRanking.map((r, i) => renderRankItem(r, i+1, col, unit)).join('')}
+          </div>
+          <div class="rank-column">
+            <h3>여자 순위</h3>
+            ${femaleRanking.map((r, i) => renderRankItem(r, i+1, col, unit)).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderCurrentEvent() {
+    if (!availableEvents.length) return;
+    const contentDiv = document.getElementById('content');
+    const def = availableEvents[currentEventIdx];
+    const html = (def.key === '전체 순위')
+      ? renderOverallRankingHTML()
+      : renderEventRankingHTML(def.key);
+    contentDiv.innerHTML = html;
+
+    const indicatorText = document.getElementById('currentEventText');
+    const indicatorIcon = document.getElementById('indicatorIcon');
+    indicatorText.textContent = def.key;
+    indicatorIcon.innerHTML = def.icon();
+  }
+
+  function renderEventTabs() {
+    const tabsWrap = document.getElementById('eventTabs');
+    tabsWrap.innerHTML = '';
+    availableEvents.forEach((def, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'event-tab-btn' + (idx === currentEventIdx ? ' active' : '');
+      btn.innerHTML = `
+        <span class="tab-icon" style="display:flex;align-items:center;color:inherit;">${def.icon()}</span>
+        <span>${def.label}</span>
+      `;
+      btn.onclick = () => {
+        currentEventIdx = idx;
+        renderEventTabs();
+        renderCurrentEvent();
+      };
+      tabsWrap.appendChild(btn);
+    });
+  }
+
+  function startAutoRotate() {
+    stopAutoRotate();
+    autoRotateTimer = setInterval(() => {
+      if (isFetching || availableEvents.length === 0) return;
+      currentEventIdx = (currentEventIdx + 1) % availableEvents.length;
+      renderEventTabs();
+      renderCurrentEvent();
+    }, 7000);
+  }
+
+  function stopAutoRotate() {
+    if (autoRotateTimer) {
+      clearInterval(autoRotateTimer);
+      autoRotateTimer = null;
+    }
+  }
+
+  function handleMonthChange() {
+    // 셀렉트 바뀌면 그 값으로 고정
+    currentSelectedMonth = getSelectedTestMonth();
+    fetchData();
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    await populateMonthSelect(false);
+    await fetchData();
+    renderEventTabs();
+    renderCurrentEvent();
+    startAutoRotate();
+
+    // 1분마다 갱신할 땐 선택값 유지
+    setInterval(async () => {
+      await populateMonthSelect(true);
+      await fetchData();
+    }, 60000);
+  });
+</script>
+
+
 </body>
 </html>
