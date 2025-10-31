@@ -300,7 +300,7 @@
       select.innerHTML = '';
       
       // 최근 6개월 + 예비반
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < 12; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
